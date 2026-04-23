@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Notifications | NexoreX</title>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #f4eee6 0%, #edf4f1 48%, #dde8ee 100%);
+            --panel: rgba(255, 255, 255, 0.92);
+            --panel-soft: rgba(255, 255, 255, 0.76);
+            --text: #1f2933;
+            --muted: #61707a;
+            --line: rgba(15, 23, 42, 0.1);
+            --brand: #9a3412;
+            --brand-deep: #7c2d12;
+            --success: #166534;
+            --danger: #b42318;
+            --shadow: 0 24px 70px rgba(31, 41, 51, 0.12);
+        }
+        * { box-sizing: border-box; }
+        body { margin:0; min-height:100vh; font-family:"Trebuchet MS", Verdana, sans-serif; color:var(--text); background:var(--bg); }
+        .shell { width:min(1100px, calc(100% - 32px)); margin:0 auto; padding:24px 0 42px; }
+        .nav, .panel { background:var(--panel); border:1px solid rgba(255,255,255,0.84); border-radius:28px; box-shadow:var(--shadow); backdrop-filter:blur(10px); }
+        .nav { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:16px 18px; }
+        .nav-actions { display:flex; gap:10px; flex-wrap:wrap; }
+        .link, .button { font:inherit; text-decoration:none; border-radius:999px; padding:10px 16px; }
+        .link { color:var(--text); }
+        .button { border:0; cursor:pointer; color:#fff; background:linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%); }
+        .panel { margin-top:22px; padding:28px; }
+        .list { display:grid; gap:14px; margin-top:18px; }
+        .item { padding:18px; border-radius:22px; background:var(--panel-soft); border:1px solid rgba(15,23,42,0.08); }
+        .badge { display:inline-flex; align-items:center; border-radius:999px; padding:6px 12px; font-size:0.84rem; font-weight:700; background:rgba(154,52,18,0.12); color:var(--brand); }
+        .message { min-height:24px; margin-top:12px; font-size:0.95rem; }
+        .message.error { color:var(--danger); }
+        .message.success { color:var(--success); }
+        .small { color:var(--muted); line-height:1.6; }
+        @media (max-width: 640px) { .shell { width:min(100% - 20px, 1100px); } .nav { flex-direction:column; align-items:start; } .panel { padding:22px; border-radius:24px; } }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <nav class="nav">
+            <div>
+                <strong style="display:block; font-size:1.3rem; letter-spacing:0.05em; text-transform:uppercase;">NexoreX</strong>
+                <span class="small">Seller notifications</span>
+            </div>
+            <div class="nav-actions">
+                <a class="link" href="./seller-dashboard.html">Seller Dashboard</a>
+                <a class="link" href="./seller-orders.html">Seller Orders</a>
+                <a class="link" href="./seller-wallet.html">Wallet</a>
+                <button class="button" id="markAllBtn" type="button">Mark All Read</button>
+                <button class="button" id="logoutBtn" type="button">Logout</button>
+            </div>
+        </nav>
+
+        <section class="panel">
+            <h2 style="margin-top:0;">Notification Center</h2>
+            <p class="small">Seller approvals, product reviews, orders, payments, reviews, and withdrawals will all land here.</p>
+            <div id="topMessage" class="message" aria-live="polite"></div>
+            <div id="notifications" class="list"></div>
+        </section>
+    </main>
+
+    <script src="./app.js"></script>
+    <script>
+        const topMessage = document.getElementById('topMessage');
+        const notificationsEl = document.getElementById('notifications');
+
+        function ensureSeller() {
+            const user = getStoredUser();
+            const token = getStoredToken();
+            if (!user || !token) {
+                window.location.href = './login.html';
+                return null;
+            }
+            if (user.role === 'admin') {
+                window.location.href = './admin-dashboard.html';
+                return null;
+            }
+            if (user.role !== 'seller') {
+                window.location.href = './buyer-dashboard.html';
+                return null;
+            }
+            return user;
+        }
+
+        function setMessage(text, type) {
+            topMessage.textContent = text;
+            topMessage.className = `message ${type}`;
+        }
+
+        function formatDate(value) {
+            return formatDateTime(value);
+        }
+
+        function renderNotifications(items) {
+            if (!items.length) {
+                notificationsEl.innerHTML = '<div class="item"><strong>No notifications yet.</strong><div class="small">New marketplace updates will appear here.</div></div>';
+                return;
+            }
+
+            notificationsEl.innerHTML = items.map((item) => `
+                <div class="item">
+                    <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center;">
+                        <strong>${item.title}</strong>
+                        <span class="badge">${item.is_read ? 'read' : 'new'}</span>
+                    </div>
+                    <div class="small" style="margin-top:8px;">${item.message}</div>
+                    <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center; margin-top:12px;">
+                        <span class="small">${item.notification_type} | ${formatDate(item.created_at)}</span>
+                        ${item.is_read ? '' : `<button class="button" type="button" onclick="markRead(${item.notification_id})">Mark Read</button>`}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadNotifications() {
+            try {
+                const response = await fetch('http://localhost:5000/api/notifications/my', {
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not load notifications');
+                }
+                renderNotifications(data);
+            } catch (error) {
+                notificationsEl.innerHTML = `<div class="item"><strong>Could not load notifications.</strong><div class="small">${error.message}</div></div>`;
+            }
+        }
+
+        async function markRead(notificationId) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
+                    method: 'PATCH',
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not update notification');
+                }
+                setMessage(data.message, 'success');
+                loadNotifications();
+            } catch (error) {
+                setMessage(error.message, 'error');
+            }
+        }
+
+        async function markAllRead() {
+            try {
+                const response = await fetch('http://localhost:5000/api/notifications/read-all', {
+                    method: 'PATCH',
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not mark all notifications as read');
+                }
+                setMessage(data.message, 'success');
+                loadNotifications();
+            } catch (error) {
+                setMessage(error.message, 'error');
+            }
+        }
+
+        window.markRead = markRead;
+        document.getElementById('markAllBtn').addEventListener('click', markAllRead);
+        document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+
+        if (ensureSeller()) {
+            loadNotifications();
+        }
+    </script>
+</body>
+</html>

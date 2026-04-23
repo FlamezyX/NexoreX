@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nexore Register Test</title>
+</head>
+<body>
+
+    <h2>Register Test</h2>
+
+    <input id="name" placeholder="Name" /><br><br>
+    <input id="email" placeholder="Email" /><br><br>
+    <input id="password" placeholder="Password" type="password" /><br><br>
+
+    <button onclick="registerUser()">Register</button>
+
+    <p id="result"></p>
+
+    <script>
+        async function registerUser() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const res = await fetch('http://localhost:5000/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, email, password })
+            });
+
+            const data = await res.json();
+
+            document.getElementById('result').innerText = data.message || "Done";
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | NexoreX</title>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #eef4f3 0%, #f7f1e8 45%, #f2e4d6 100%);
+            --panel: rgba(255,255,255,0.92);
+            --text: #1f2933;
+            --muted: #61707a;
+            --line: rgba(15,23,42,0.1);
+            --brand: #0f766e;
+            --brand-deep: #134e4a;
+            --danger: #b42318;
+            --success: #166534;
+            --shadow: 0 24px 70px rgba(31,41,51,0.12);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { min-height:100vh; font-family:"Trebuchet MS", Verdana, sans-serif; color:var(--text); background:var(--bg); opacity:0; animation:fadeIn 0.45s ease forwards; }
+        @keyframes fadeIn { to { opacity:1; } }
+        @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        .shell { width:min(1080px, calc(100% - 32px)); margin:0 auto; padding:24px 0 42px; }
+        .nav, .panel { background:var(--panel); border:1px solid rgba(255,255,255,0.84); border-radius:28px; box-shadow:var(--shadow); backdrop-filter: blur(10px); animation:slideUp 0.5s ease both; }
+        .nav { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:16px 18px; }
+        .nav-actions { display:flex; gap:10px; flex-wrap:wrap; }
+        .link, .button { font:inherit; text-decoration:none; border-radius:999px; padding:10px 16px; transition:transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease; }
+        .link { color:var(--text); }
+        .link:hover { background:rgba(31,41,51,0.06); }
+        .button { border:0; cursor:pointer; color:#fff; background:linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%); box-shadow:0 10px 24px rgba(15,118,110,0.16); }
+        .button:hover { transform:translateY(-2px); box-shadow:0 16px 32px rgba(15,118,110,0.26); }
+        .button:active { transform:translateY(0); }
+        .grid { display:grid; grid-template-columns: 1fr 0.9fr; gap:22px; margin-top:22px; }
+        .panel { padding:28px; }
+        form { display:grid; gap:14px; }
+        label { font-size:0.95rem; font-weight:700; }
+        select, textarea { width:100%; margin-top:6px; border:1px solid var(--line); border-radius:16px; padding:14px 16px; font:inherit; background:#fff; }
+        textarea { min-height:120px; resize:vertical; }
+        .message { min-height:24px; margin-top:12px; font-size:0.95rem; }
+        .message.error { color:var(--danger); }
+        .message.success { color:var(--success); }
+        .order-items { display:grid; gap:12px; margin-top:16px; }
+        .order-item { padding:14px; border-radius:20px; background:rgba(255,255,255,0.76); border:1px solid rgba(15,23,42,0.08); }
+        .hamburger {
+            display: none; flex-direction: column; gap: 5px;
+            background: none; border: none; cursor: pointer;
+            padding: 6px; border-radius: 10px; transition: background 0.2s ease;
+        }
+        .hamburger:hover { background: rgba(31,41,51,0.07); }
+        .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: transform 0.3s ease, opacity 0.3s ease; }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+        @media (max-width: 720px) {
+            .nav { flex-wrap: wrap; }
+            .nav-actions {
+                display: none; width: 100%; flex-direction: column;
+                align-items: stretch; gap: 4px;
+                padding-top: 8px; border-top: 1px solid rgba(15,23,42,0.08);
+            }
+            .nav-actions.open { display: flex; }
+            .nav-actions a, .nav-actions button { text-align: left; border-radius: 14px; padding: 12px 14px; }
+            .hamburger { display: flex; }
+            .panel { padding: 22px; border-radius: 22px; }
+        }
+        @media (max-width: 480px) { .shell { width: calc(100% - 24px); } }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <nav class="nav">
+            <div>
+                <strong style="display:block; font-size:1.3rem; letter-spacing:0.05em; text-transform:uppercase;">NexoreX</strong>
+                <span style="color:var(--muted);">Checkout</span>
+            </div>
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu" type="button">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-actions" id="navActions">
+                <a class="link" href="./cart.html">Back To Cart</a>
+                <a class="link" href="./orders.html">Orders</a>
+                <button class="button" id="logoutBtn" type="button">Logout</button>
+            </div>
+        </nav>
+
+        <section class="grid">
+            <article class="panel">
+                <h2 style="margin-top:0;">Delivery and Payment</h2>
+                <p style="color:var(--muted);">Select your shipping option and address. After placing the order, transfer the exact amount to the bank details shown and upload your proof on the Orders page.</p>
+                <form id="checkoutForm">
+                    <label>Shipping Option
+                        <select id="shippingOption" required></select>
+                    </label>
+                    <label>Delivery Address
+                        <textarea id="deliveryAddress" required placeholder="Enter your full delivery address"></textarea>
+                    </label>
+                    <button class="button" id="submitBtn" type="submit">Place Order</button>
+                </form>
+                <div id="message" class="message" aria-live="polite"></div>
+
+                <!-- Bank details shown after order is placed -->
+                <div id="bankDetails" style="display:none; margin-top:20px; padding:20px; border-radius:18px; background:rgba(15,118,110,0.06); border:1px solid rgba(15,118,110,0.18);">
+                    <strong style="display:block; margin-bottom:12px; font-size:1.05rem;">💳 Transfer Payment To</strong>
+                    <div id="bankInfo" style="display:grid; gap:8px; font-size:0.95rem; color:var(--text);"></div>
+                </div>
+            </article>
+
+            <aside class="panel">
+                <h2 style="margin-top:0;">Order Summary</h2>
+                <div id="items" class="order-items"></div>
+                <div style="display:flex; justify-content:space-between; gap:12px; margin-top:16px;"><span style="color:var(--muted);">Subtotal</span><strong id="subtotal">₦0.00</strong></div>
+            </aside>
+        </section>
+    </main>
+
+    <script src="./app.js"></script>
+    <script>
+        const itemsEl = document.getElementById('items');
+        const subtotalEl = document.getElementById('subtotal');
+        const shippingOptionEl = document.getElementById('shippingOption');
+        const messageEl = document.getElementById('message');
+        const submitBtn = document.getElementById('submitBtn');
+
+        function ensureBuyer() {
+            const user = getStoredUser();
+            const token = getStoredToken();
+            if (!user || !token) { window.location.href = './login.html'; return null; }
+            if (user.role === 'admin') { window.location.href = './admin-dashboard.html'; return null; }
+            if (user.role === 'seller') { window.location.href = './seller-dashboard.html'; return null; }
+            return user;
+        }
+
+        function setMessage(text, type) {
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+        }
+
+        function formatPrice(value) {
+            return formatMoney(value);
+        }
+
+        function renderCartSummary() {
+            const cart = getCart();
+            const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
+            subtotalEl.textContent = formatPrice(subtotal);
+
+            if (!cart.length) {
+                itemsEl.innerHTML = '<div class="order-item"><strong>Your cart is empty.</strong><div style="color:var(--muted); margin-top:8px;">Go back and add products before checking out.</div></div>';
+                submitBtn.disabled = true;
+                return;
+            }
+
+            itemsEl.innerHTML = cart.map((item) => `
+                <div class="order-item">
+                    <strong>${item.name}</strong>
+                    <div style="color:var(--muted); margin-top:6px;">Quantity: ${item.quantity}</div>
+                    <div style="color:var(--muted);">Line total: ${formatPrice(item.price * item.quantity)}</div>
+                </div>
+            `).join('');
+        }
+
+        async function loadShippingOptions() {
+            try {
+                const response = await fetch('http://localhost:5000/api/shipping-options');
+                const data = await response.json();
+                if (!response.ok || !Array.isArray(data)) {
+                    throw new Error('Could not load shipping options');
+                }
+
+                if (!data.length) {
+                    shippingOptionEl.innerHTML = '<option value="">No shipping options available</option>';
+                    return;
+                }
+
+                shippingOptionEl.innerHTML = data.map((option) => `
+                    <option value="${option.shipping_option_id}">
+                        ${option.name} - ${option.delivery_time} - ${formatPrice(option.price)}
+                    </option>
+                `).join('');
+            } catch (error) {
+                shippingOptionEl.innerHTML = '<option value="">Could not load shipping options</option>';
+            }
+        }
+
+        let bankDetails = {};
+
+        async function loadBankDetails() {
+            try {
+                const res = await fetch('http://localhost:5000/api/platform-settings');
+                bankDetails = await res.json();
+            } catch {}
+        }
+
+        function showBankDetails(totalAmount) {
+            const box = document.getElementById('bankDetails');
+            const info = document.getElementById('bankInfo');
+            if (!bankDetails.bank_account_number) return;
+            info.innerHTML = [
+                bankDetails.bank_name ? `<div><span style="color:var(--muted);">Bank:</span> <strong>${bankDetails.bank_name}</strong></div>` : '',
+                bankDetails.bank_account_name ? `<div><span style="color:var(--muted);">Account Name:</span> <strong>${bankDetails.bank_account_name}</strong></div>` : '',
+                `<div><span style="color:var(--muted);">Account Number:</span> <strong style="font-size:1.15rem; letter-spacing:0.05em;">${bankDetails.bank_account_number}</strong></div>`,
+                `<div><span style="color:var(--muted);">Amount:</span> <strong style="color:#0f766e;">${formatMoney(totalAmount)}</strong></div>`,
+                bankDetails.bank_instructions ? `<div style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(15,118,110,0.15); color:var(--muted); font-size:0.9rem;">${bankDetails.bank_instructions}</div>` : ''
+            ].join('');
+            box.style.display = 'block';
+        }
+
+        document.getElementById('checkoutForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const cart = getCart();
+            if (!cart.length) { setMessage('Your cart is empty.', 'error'); return; }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Placing order...';
+
+            try {
+                const response = await fetch('http://localhost:5000/api/orders/checkout', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        items: cart.map((item) => ({ product_id: item.product_id, quantity: item.quantity })),
+                        shipping_option_id: shippingOptionEl.value,
+                        delivery_address: document.getElementById('deliveryAddress').value.trim()
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Could not create order');
+
+                const total = cart.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
+                clearCart();
+                setMessage(data.message || 'Order placed! Transfer payment to the account below.', 'success');
+                document.getElementById('checkoutForm').style.display = 'none';
+                showBankDetails(total);
+            } catch (error) {
+                setMessage(error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Place Order';
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+        document.getElementById('hamburger').addEventListener('click', function() {
+            this.classList.toggle('open');
+            document.getElementById('navActions').classList.toggle('open');
+        });
+        if (ensureBuyer()) {
+            renderCartSummary();
+            loadShippingOptions();
+            loadBankDetails();
+        }
+    </script>
+</body>
+</html>

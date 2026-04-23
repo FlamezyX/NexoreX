@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexoreX | Discover Products</title>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #f6efe5 0%, #f6f5ef 32%, #dce7ea 100%);
+            --surface: rgba(255, 255, 255, 0.88);
+            --surface-strong: rgba(255, 255, 255, 0.96);
+            --text: #1f2933;
+            --muted: #5f6b73;
+            --line: rgba(15, 23, 42, 0.1);
+            --brand: #c05621;
+            --brand-deep: #7c2d12;
+            --teal: #0f766e;
+            --shadow: 0 28px 80px rgba(31, 41, 51, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Georgia, "Times New Roman", serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(192, 86, 33, 0.14), transparent 30%),
+                radial-gradient(circle at top right, rgba(15, 118, 110, 0.16), transparent 34%),
+                var(--bg);
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(22px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .shell {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+        }
+
+        header {
+            padding: 22px 0;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 24px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 16px 50px rgba(31, 41, 51, 0.08);
+            animation: slideUp 0.5s ease both;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .brand strong {
+            font-size: 1.35rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .brand span {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .nav-links, .nav-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        a, button {
+            font: inherit;
+        }
+
+        .link {
+            color: var(--text);
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 999px;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .link:hover {
+            background: rgba(31, 41, 51, 0.06);
+            color: var(--brand);
+        }
+
+        .button {
+            border: 0;
+            border-radius: 999px;
+            padding: 11px 18px;
+            cursor: pointer;
+            color: #fff;
+            text-decoration: none;
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%);
+            box-shadow: 0 12px 25px rgba(124, 45, 18, 0.18);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 35px rgba(124, 45, 18, 0.26);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 24px;
+            align-items: stretch;
+            padding: 16px 0 28px;
+        }
+
+        .hero-copy,
+        .hero-panel,
+        .section-card {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            border-radius: 30px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.55s ease both;
+        }
+
+        .hero-panel { animation-delay: 0.08s; }
+        .section-card { animation-delay: 0.14s; }
+
+        .hero-copy {
+            padding: 34px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--teal);
+            font-size: 0.88rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        h1 {
+            margin: 18px 0 16px;
+            font-size: clamp(2.6rem, 5vw, 5rem);
+            line-height: 0.94;
+            max-width: 10ch;
+        }
+
+        .hero-copy p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--muted);
+            max-width: 58ch;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 22px;
+        }
+
+        .ghost {
+            border: 1px solid var(--line);
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.55);
+        }
+
+        .hero-panel {
+            padding: 28px;
+            display: grid;
+            gap: 16px;
+            align-content: space-between;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(236, 246, 245, 0.9)),
+                var(--surface);
+        }
+
+        .hero-panel h2,
+        .products-head h2 {
+            margin: 0;
+            font-size: 1.6rem;
+        }
+
+        .stat-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .stat {
+            padding: 18px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 1.8rem;
+            margin-bottom: 4px;
+        }
+
+        .stat span {
+            color: var(--muted);
+        }
+
+        .content {
+            padding-bottom: 36px;
+        }
+
+        .section-card {
+            padding: 28px;
+        }
+
+        .products-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: end;
+            margin-bottom: 22px;
+        }
+
+        .products-head p {
+            margin: 6px 0 0;
+            color: var(--muted);
+        }
+
+        .status {
+            color: var(--muted);
+            font-size: 0.96rem;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .product-card {
+            overflow: hidden;
+            border-radius: 24px;
+            background: var(--surface-strong);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 20px 45px rgba(31, 41, 51, 0.08);
+            transition: transform 0.22s ease, box-shadow 0.22s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 32px 60px rgba(31, 41, 51, 0.14);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+            background: #ebe7e0;
+            transition: transform 0.35s ease;
+        }
+
+        .product-card:hover img {
+            transform: scale(1.04);
+        }
+
+        .product-body {
+            padding: 18px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .product-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: start;
+        }
+
+        .product-name {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .price {
+            white-space: nowrap;
+            font-weight: 700;
+            color: var(--brand-deep);
+        }
+
+        .product-desc {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.6;
+            min-height: 72px;
+        }
+
+        .meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--muted);
+            padding-top: 8px;
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
+        }
+
+        .rating-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            color: var(--teal);
+            font-weight: 700;
+            font-size: 0.92rem;
+        }
+
+        .review-panel {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.44);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 20;
+        }
+
+        .review-panel.open {
+            display: flex;
+        }
+
+        .review-dialog {
+            width: min(760px, 100%);
+            max-height: 85vh;
+            overflow: auto;
+            background: var(--surface-strong);
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .review-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .review-item {
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.84);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+        }
+
+        .empty-state {
+            display: grid;
+            place-items: center;
+            text-align: center;
+            min-height: 280px;
+            padding: 24px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(255, 248, 241, 0.92), rgba(237, 248, 246, 0.92));
+            border: 1px dashed rgba(15, 23, 42, 0.14);
+        }
+
+        .empty-state h3 {
+            margin: 0 0 10px;
+            font-size: 1.6rem;
+        }
+
+        .empty-state p {
+            margin: 0;
+            max-width: 46ch;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 10px;
+            transition: background 0.2s ease;
+        }
+        .hamburger:hover { background: rgba(31,41,51,0.07); }
+        .hamburger span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--text);
+            border-radius: 2px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        @media (max-width: 980px) {
+            .hero { grid-template-columns: 1fr; }
+            .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 720px) {
+            .nav { flex-wrap: wrap; position: relative; }
+            .nav-links, .nav-actions {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 4px;
+                padding-top: 8px;
+                border-top: 1px solid rgba(15,23,42,0.08);
+            }
+            .nav-links.open, .nav-actions.open { display: flex; }
+            .nav-links a, .nav-actions a, .nav-actions button {
+                text-align: left;
+                border-radius: 14px;
+                padding: 12px 14px;
+            }
+            .hamburger { display: flex; }
+            .products-head { flex-direction: column; align-items: start; }
+            .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .hero-copy, .hero-panel, .section-card { border-radius: 22px; padding: 22px; }
+            h1 { font-size: clamp(2rem, 8vw, 3rem); }
+        }
+
+        @media (max-width: 480px) {
+            .shell { width: calc(100% - 24px); }
+            .product-grid { grid-template-columns: 1fr; }
+            .hero-actions { flex-direction: column; }
+            .hero-actions .button { text-align: center; }
+            .product-card img { height: 180px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="shell">
+        <nav class="nav">
+            <div class="brand">
+                <strong>NexoreX</strong>
+                <span id="welcomeText">Find standout products from your community.</span>
+            </div>
+
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu" type="button">
+                <span></span><span></span><span></span>
+            </button>
+
+            <div class="nav-links" id="navLinks">
+                <a class="link" href="./index.html">Home</a>
+                <a class="link" href="./buyer-dashboard.html">Buyer Dashboard</a>
+                <a class="link" href="./cart.html">Cart (<span id="cartCount">0</span>)</a>
+            </div>
+
+            <div class="nav-actions" id="navActions">
+                <a class="link" href="./register.html">Register</a>
+                <a class="button" href="./login.html">Login</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="shell content">
+        <section class="hero">
+            <article class="hero-copy">
+                <div class="eyebrow">Curated Marketplace</div>
+                <h1>Products worth a second look.</h1>
+                <p>
+                    NexoreX brings your catalog to the front page with a cleaner, faster browsing experience.
+                    Buyers can explore what is available before they even step into their dashboard.
+                </p>
+
+                <div class="hero-actions">
+                    <a class="button" href="./buyer-dashboard.html">Go To Buyer Dashboard</a>
+                    <a class="button ghost" href="#productsSection">Browse Products</a>
+                </div>
+            </article>
+
+            <aside class="hero-panel">
+                <div>
+                    <h2>Marketplace Snapshot</h2>
+                    <p id="snapshotText" class="status">Loading product summary...</p>
+                </div>
+
+                <div class="stat-grid">
+                    <div class="stat">
+                        <strong id="productCount">0</strong>
+                        <span>Products currently visible on the home feed</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="sessionState">Guest</strong>
+                        <span>Your current browsing state</span>
+                    </div>
+                </div>
+            </aside>
+        </section>
+
+        <section id="productsSection" class="section-card">
+            <div class="products-head">
+                <div>
+                    <h2>Featured Products</h2>
+                    <p>Fresh from the NexoreX catalog feed.</p>
+                </div>
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                    <input id="searchInput" type="text" placeholder="Search products..." style="border:1px solid var(--line); border-radius:999px; padding:10px 16px; font:inherit; font-size:0.92rem; background:rgba(255,255,255,0.8); outline:none; width:220px;">
+                    <div id="feedStatus" class="status">Loading products...</div>
+                </div>
+            </div>
+            <div id="productList" class="product-grid"></div>
+            <div id="pagination" style="display:flex; justify-content:center; gap:10px; margin-top:24px; flex-wrap:wrap;"></div>
+        </section>
+    </main>
+
+    <div id="reviewPanel" class="review-panel">
+        <div class="review-dialog">
+            <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
+                <div>
+                    <h2 id="reviewTitle" style="margin:0;">Product Reviews</h2>
+                    <p id="reviewSubtitle" class="status" style="margin:8px 0 0;">Loading reviews...</p>
+                </div>
+                <button class="button" id="closeReviewsBtn" type="button">Close</button>
+            </div>
+            <div id="reviewList" class="review-list"></div>
+        </div>
+    </div>
+
+    <script src="./app.js"></script>
+    <script>
+        const navActions = document.getElementById('navActions');
+        const welcomeText = document.getElementById('welcomeText');
+        const sessionState = document.getElementById('sessionState');
+        const productCount = document.getElementById('productCount');
+        const cartCountLabel = document.getElementById('cartCount');
+        const productList = document.getElementById('productList');
+        const feedStatus = document.getElementById('feedStatus');
+        const snapshotText = document.getElementById('snapshotText');
+        const reviewPanel = document.getElementById('reviewPanel');
+        const reviewTitle = document.getElementById('reviewTitle');
+        const reviewSubtitle = document.getElementById('reviewSubtitle');
+        const reviewList = document.getElementById('reviewList');
+
+        function formatPrice(value) {
+            const numericValue = Number(value);
+            if (Number.isNaN(numericValue)) {
+                return value;
+            }
+
+            return formatMoney(numericValue);
+        }
+
+        function formatDate(value) {
+            if (!value) {
+                return 'Recently added';
+            }
+
+            return formatDateShort(value);
+        }
+
+        function updateNav() {
+            const user = getStoredUser();
+            if (!user) {
+                sessionState.textContent = 'Guest';
+                return;
+            }
+
+            welcomeText.textContent = `Welcome back, ${user.name}. Your saved session is active.`;
+            sessionState.textContent = 'Logged In';
+            const dashboardPath = user.role === 'admin'
+                ? './admin-dashboard.html'
+                : user.role === 'seller'
+                    ? './seller-dashboard.html'
+                    : './buyer-dashboard.html';
+            navActions.innerHTML = `
+                <a class="link" href="${dashboardPath}">My Dashboard</a>
+                <button class="button" id="logoutBtn" type="button">Logout</button>
+            `;
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                logoutUser();
+            });
+        }
+
+        function renderEmptyState() {
+            productList.className = '';
+            productList.innerHTML = `
+                <div class="empty-state">
+                    <div>
+                        <h3>No products yet</h3>
+                        <p>
+                            The home feed is ready, but no products have been added to the marketplace yet.
+                            Once sellers publish products, they will appear here automatically.
+                        </p>
+                    </div>
+                </div>
+            `;
+            feedStatus.textContent = '0 products loaded';
+            snapshotText.textContent = 'The marketplace is empty right now, but the feed is connected and ready.';
+            productCount.textContent = '0';
+        }
+
+        function renderProducts(products) {
+            if (!products.length) {
+                renderEmptyState();
+                return;
+            }
+
+            productList.className = 'product-grid';
+            productList.innerHTML = products.map((product) => `
+                <article class="product-card">
+                    <img src="${product.image_url}" alt="${product.name}">
+                    <div class="product-body">
+                        <div class="product-top">
+                            <h3 class="product-name">${product.name}</h3>
+                            <span class="price">${formatPrice(product.price)}</span>
+                        </div>
+                        <p class="product-desc">${product.description}</p>
+                        <div class="rating-row">
+                            <span>${Number(product.average_rating || 0).toFixed(1)} stars</span>
+                            <span>${product.review_count} review${Number(product.review_count) === 1 ? '' : 's'}</span>
+                        </div>
+                        <button class="button" type="button" onclick="handleAddToCart(${product.product_id})">Add To Cart</button>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button class="button ghost" type="button" onclick="openReviews(${product.product_id}, '${String(product.name).replace(/'/g, "\\'")}')">View Reviews</button>
+                            <a class="link" href="./seller-store.html?seller=${product.seller_id}" style="padding-left:0;">Visit ${product.seller_name}'s Store</a>
+                            <a class="button ghost" href="./chat.html?with=${product.seller_id}&product=${product.product_id}" style="text-decoration:none;">💬 Message Seller</a>
+                        </div>
+                        <div class="meta">
+                            <span>${product.seller_name}</span>
+                            <span>${formatDate(product.created_at)}</span>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+
+            productCount.textContent = String(products.length);
+            feedStatus.textContent = `${products.length} product${products.length === 1 ? '' : 's'} loaded`;
+            snapshotText.textContent = `The home feed is showing ${products.length} marketplace product${products.length === 1 ? '' : 's'} right now.`;
+        }
+
+        function updateCartBadge() {
+            cartCountLabel.textContent = String(cartCount());
+        }
+
+        function handleAddToCart(productId) {
+            const cardProduct = window.loadedProducts.find((product) => product.product_id === productId);
+            if (!cardProduct) {
+                return;
+            }
+
+            addToCart(cardProduct);
+            updateCartBadge();
+        }
+
+        window.handleAddToCart = handleAddToCart;
+
+        async function openReviews(productId, productName) {
+            reviewPanel.classList.add('open');
+            reviewTitle.textContent = `${productName} Reviews`;
+            reviewSubtitle.textContent = 'Loading reviews...';
+            reviewList.innerHTML = '';
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/reviews/product/${productId}`);
+                const reviews = await response.json();
+
+                if (!response.ok || !Array.isArray(reviews)) {
+                    throw new Error('Could not load product reviews');
+                }
+
+                reviewSubtitle.textContent = `${reviews.length} published review${reviews.length === 1 ? '' : 's'}`;
+                reviewList.innerHTML = reviews.length ? reviews.map((review) => `
+                    <div class="review-item">
+                        <strong>${review.buyer_name}</strong>
+                        <div class="status" style="margin-top:6px;">${review.rating}/5 | ${formatDate(review.created_at)}</div>
+                        <p style="margin:10px 0 0; color:var(--muted); line-height:1.6;">${review.comment || 'No comment added.'}</p>
+                    </div>
+                `).join('') : `
+                    <div class="review-item">
+                        <strong>No reviews yet.</strong>
+                        <p style="margin:10px 0 0; color:var(--muted); line-height:1.6;">This product has not received published reviews yet.</p>
+                    </div>
+                `;
+            } catch (error) {
+                reviewSubtitle.textContent = error.message;
+                reviewList.innerHTML = '';
+            }
+        }
+
+        function closeReviews() {
+            reviewPanel.classList.remove('open');
+        }
+
+        window.openReviews = openReviews;
+
+        let currentPage = 1;
+        let currentSearch = '';
+        let searchTimer = null;
+
+        function renderPagination(page, totalPages) {
+            const pag = document.getElementById('pagination');
+            if (totalPages <= 1) { pag.innerHTML = ''; return; }
+            let html = '';
+            if (page > 1) html += `<button class="button ghost" onclick="goToPage(${page - 1})">← Prev</button>`;
+            for (let i = Math.max(1, page - 2); i <= Math.min(totalPages, page + 2); i++) {
+                html += `<button class="button ${i === page ? '' : 'ghost'}" onclick="goToPage(${i})">${i}</button>`;
+            }
+            if (page < totalPages) html += `<button class="button ghost" onclick="goToPage(${page + 1})">Next →</button>`;
+            pag.innerHTML = html;
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            loadProducts();
+            document.getElementById('productsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+        window.goToPage = goToPage;
+
+        async function loadProducts() {
+            feedStatus.textContent = 'Loading...';
+            try {
+                const params = new URLSearchParams({ page: currentPage, limit: 12 });
+                if (currentSearch) params.set('search', currentSearch);
+                const response = await fetch(`http://localhost:5000/api/products?${params}`);
+                const data = await response.json();
+
+                if (!response.ok) throw new Error('Unable to load products');
+
+                const products = data.products || [];
+                window.loadedProducts = products;
+                renderProducts(products);
+                renderPagination(data.page, data.totalPages);
+                productCount.textContent = String(data.total);
+                feedStatus.textContent = `${data.total} product${data.total === 1 ? '' : 's'} found`;
+                snapshotText.textContent = `Showing page ${data.page} of ${data.totalPages} — ${data.total} product${data.total === 1 ? '' : 's'} in the marketplace.`;
+            } catch (error) {
+                productList.className = '';
+                productList.innerHTML = `
+                    <div class="empty-state">
+                        <div>
+                            <h3>Could not load products</h3>
+                            <p>The product feed could not be reached. Make sure the backend server is running on port 5000.</p>
+                        </div>
+                    </div>
+                `;
+                feedStatus.textContent = 'Feed unavailable';
+                snapshotText.textContent = 'The feed is temporarily unavailable.';
+            }
+        }
+
+        updateCartBadge();
+        updateNav();
+        loadProducts();
+        document.getElementById('closeReviewsBtn').addEventListener('click', closeReviews);
+        reviewPanel.addEventListener('click', (event) => {
+            if (event.target === reviewPanel) closeReviews();
+        });
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('navLinks');
+        hamburger.addEventListener('click', () => {
+            const open = hamburger.classList.toggle('open');
+            navLinks.classList.toggle('open', open);
+            navActions.classList.toggle('open', open);
+        });
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                currentSearch = e.target.value.trim();
+                currentPage = 1;
+                loadProducts();
+            }, 350);
+        });
+    </script>
+</body>
+</html>

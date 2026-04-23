@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders | NexoreX</title>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #eef4f3 0%, #f7f1e8 45%, #f2e4d6 100%);
+            --panel: rgba(255,255,255,0.92);
+            --panel-soft: rgba(255,255,255,0.76);
+            --text: #1f2933;
+            --muted: #61707a;
+            --line: rgba(15,23,42,0.1);
+            --brand: #0f766e;
+            --brand-deep: #134e4a;
+            --danger: #b42318;
+            --success: #166534;
+            --shadow: 0 24px 70px rgba(31,41,51,0.12);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { min-height:100vh; font-family:"Trebuchet MS", Verdana, sans-serif; color:var(--text); background:var(--bg); opacity:0; animation:fadeIn 0.45s ease forwards; }
+        @keyframes fadeIn { to { opacity:1; } }
+        @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        .shell { width:min(1120px, calc(100% - 32px)); margin:0 auto; padding:24px 0 42px; }
+        .nav, .panel { background:var(--panel); border:1px solid rgba(255,255,255,0.84); border-radius:28px; box-shadow:var(--shadow); backdrop-filter: blur(10px); animation:slideUp 0.5s ease both; }
+        .nav { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:16px 18px; }
+        .nav-actions { display:flex; gap:10px; flex-wrap:wrap; }
+        .link, .button { font:inherit; text-decoration:none; border-radius:999px; padding:10px 16px; transition:transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease; }
+        .link { color:var(--text); }
+        .link:hover { background:rgba(31,41,51,0.06); }
+        .button { border:0; cursor:pointer; color:#fff; background:linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%); box-shadow:0 10px 24px rgba(15,118,110,0.16); }
+        .button:hover { transform:translateY(-2px); box-shadow:0 16px 32px rgba(15,118,110,0.26); }
+        .button:active { transform:translateY(0); }
+        .panel { margin-top:22px; padding:28px; }
+        .orders { display:grid; gap:14px; margin-top:18px; }
+        .order-card { padding:18px; border-radius:24px; background:var(--panel-soft); border:1px solid rgba(15,23,42,0.08); transition:transform 0.2s ease, box-shadow 0.2s ease; }
+        .order-card:hover { transform:translateY(-3px); box-shadow:0 14px 32px rgba(31,41,51,0.1); }
+        .order-head, .order-meta { display:flex; gap:12px; flex-wrap:wrap; justify-content:space-between; align-items:center; }
+        .badge { display:inline-flex; align-items:center; border-radius:999px; padding:6px 12px; background:rgba(15,118,110,0.1); color:var(--brand); font-weight:700; font-size:0.86rem; }
+        textarea, input { width:100%; margin-top:10px; border:1px solid var(--line); border-radius:14px; padding:12px 14px; font:inherit; background:#fff; }
+        .message { min-height:24px; margin-top:12px; font-size:0.95rem; }
+        .message.error { color:var(--danger); }
+        .message.success { color:var(--success); }
+        select, textarea { width:100%; margin-top:10px; border:1px solid var(--line); border-radius:14px; padding:12px 14px; font:inherit; background:#fff; }
+        .hamburger {
+            display: none; flex-direction: column; gap: 5px;
+            background: none; border: none; cursor: pointer;
+            padding: 6px; border-radius: 10px; transition: background 0.2s ease;
+        }
+        .hamburger:hover { background: rgba(31,41,51,0.07); }
+        .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: transform 0.3s ease, opacity 0.3s ease; }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+        @media (max-width: 720px) {
+            .nav { flex-wrap: wrap; }
+            .nav-actions {
+                display: none; width: 100%; flex-direction: column;
+                align-items: stretch; gap: 4px;
+                padding-top: 8px; border-top: 1px solid rgba(15,23,42,0.08);
+            }
+            .nav-actions.open { display: flex; }
+            .nav-actions a, .nav-actions button { text-align: left; border-radius: 14px; padding: 12px 14px; }
+            .hamburger { display: flex; }
+            .panel { padding: 22px; border-radius: 22px; }
+        }
+        @media (max-width: 480px) { .shell { width: calc(100% - 24px); } }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <nav class="nav">
+            <div>
+                <strong style="display:block; font-size:1.3rem; letter-spacing:0.05em; text-transform:uppercase;">NexoreX</strong>
+                <span style="color:var(--muted);">Your orders</span>
+            </div>
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu" type="button">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-actions" id="navActions">
+                <a class="link" href="./index.html">Home Feed</a>
+                <a class="link" href="./cart.html">Cart</a>
+                <button class="button" id="logoutBtn" type="button">Logout</button>
+            </div>
+        </nav>
+
+        <section class="panel">
+            <h2 style="margin-top:0;">Orders</h2>
+            <p style="color:var(--muted);">After checkout, transfer the exact order amount to the platform bank account below, then upload your reference and proof so admin can confirm it.</p>
+            <div id="bankBox" style="margin-top:14px; padding:16px 20px; border-radius:16px; background:rgba(15,118,110,0.06); border:1px solid rgba(15,118,110,0.18); display:none;">
+                <strong style="display:block; margin-bottom:10px;">💳 Platform Bank Account</strong>
+                <div id="bankInfo" style="display:grid; gap:6px; font-size:0.93rem;"></div>
+            </div>
+            <div id="topMessage" class="message" aria-live="polite"></div>
+            <div id="orders" class="orders"></div>
+        </section>
+    </main>
+
+    <script src="./app.js"></script>
+    <script>
+        const ordersEl = document.getElementById('orders');
+        const topMessage = document.getElementById('topMessage');
+
+        function ensureSignedIn() {
+            const user = getStoredUser();
+            const token = getStoredToken();
+            if (!user || !token) {
+                window.location.href = './login.html';
+                return null;
+            }
+            if (user.role === 'admin') {
+                window.location.href = './admin-dashboard.html';
+                return null;
+            }
+            return user;
+        }
+
+        function setMessage(text, type) {
+            topMessage.textContent = text;
+            topMessage.className = `message ${type}`;
+        }
+
+        function formatPrice(value) {
+            return formatMoney(value);
+        }
+
+        function formatDate(value) {
+            return formatDateTime(value);
+        }
+
+        function statusSteps(order) {
+            const flow = ['pending_payment', 'payment_uploaded', 'payment_confirmed', 'processing', 'shipped', 'delivered'];
+            const currentIndex = flow.indexOf(order.status);
+
+            return flow.map((step, index) => `
+                <span style="
+                    padding:6px 10px;
+                    border-radius:999px;
+                    background:${index <= currentIndex ? 'rgba(15,118,110,0.14)' : 'rgba(15,23,42,0.06)'};
+                    color:${index <= currentIndex ? 'var(--brand)' : 'var(--muted)'};
+                    font-size:0.82rem;
+                    font-weight:700;
+                ">${orderStatusLabel(step)}</span>
+            `).join('');
+        }
+
+        function renderOrders(orders) {
+            if (!orders.length) {
+                ordersEl.innerHTML = '<div class="order-card"><strong>No orders yet.</strong><div style="color:var(--muted); margin-top:8px;">Create a checkout from your cart to see orders here.</div></div>';
+                return;
+            }
+
+            ordersEl.innerHTML = orders.map((order) => `
+                <div class="order-card">
+                    <div class="order-head">
+                        <div>
+                            <strong>Order #${order.order_id}</strong>
+                            <div style="color:var(--muted); margin-top:6px;">Created: ${formatDate(order.created_at)}</div>
+                        </div>
+                        <span class="badge">${order.status}</span>
+                    </div>
+                    <div class="order-meta" style="margin-top:12px;">
+                        <span style="color:var(--muted);">Total: ${formatPrice(order.total_amount)}</span>
+                        <span style="color:var(--muted);">Seller amount: ${formatPrice(order.seller_amount)}</span>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
+                        ${statusSteps(order)}
+                    </div>
+                    <div style="margin-top:12px; color:var(--muted);">Delivery address: ${order.delivery_address || 'Not provided'}</div>
+                    ${order.admin_note ? `<div style="margin-top:10px; color:var(--muted);">Admin note: ${order.admin_note}</div>` : ''}
+                    <div style="margin-top:12px;">
+                        ${order.items.map((item) => `
+                            <div style="padding:10px 0; border-top:1px solid rgba(15,23,42,0.08);">
+                                <strong>${item.product_name}</strong>
+                                <div style="color:var(--muted); margin-top:4px;">${item.quantity} x ${formatPrice(item.unit_price)}</div>
+                                ${order.status === 'delivered' && !item.review_id ? `
+                                    <div style="margin-top:10px; padding-top:10px; border-top:1px dashed rgba(15,23,42,0.12);">
+                                        <strong style="display:block; margin-bottom:4px;">Leave a review</strong>
+                                        <select id="review-rating-${order.order_id}-${item.product_id}">
+                                            <option value="5">5 stars</option>
+                                            <option value="4">4 stars</option>
+                                            <option value="3">3 stars</option>
+                                            <option value="2">2 stars</option>
+                                            <option value="1">1 star</option>
+                                        </select>
+                                        <textarea id="review-comment-${order.order_id}-${item.product_id}" placeholder="Share what the buyer experience was like"></textarea>
+                                        <button class="button" type="button" style="margin-top:10px;" onclick="submitReview(${order.order_id}, ${item.product_id})">Submit Review</button>
+                                    </div>
+                                ` : ''}
+                                ${item.review_id ? `
+                                    <div style="margin-top:10px; padding-top:10px; border-top:1px dashed rgba(15,23,42,0.12); color:var(--muted);">
+                                        <strong style="display:block; color:var(--text);">Review submitted</strong>
+                                        <div style="margin-top:4px;">Rating: ${item.review_rating}/5</div>
+                                        <div style="margin-top:4px;">${item.review_comment || 'No comment added.'}</div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${(order.status === 'pending_payment' || order.status === 'payment_uploaded') ? `
+                        <div style="margin-top:14px;">
+                            <input id="payment-ref-${order.order_id}" type="text" placeholder="Bank transfer reference" value="${order.payment_reference || ''}">
+                            <input id="payment-proof-${order.order_id}" type="file" accept="image/png,image/jpeg,image/webp">
+                            <div style="color:var(--muted); margin-top:8px;">Accepted formats: JPG, PNG, WEBP</div>
+                            ${order.payment_proof_url ? `<a style="display:inline-block; margin-top:10px; color:var(--brand);" href="http://localhost:5000${order.payment_proof_url}" target="_blank" rel="noopener noreferrer">View uploaded proof</a>` : ''}
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+                                <button class="button" type="button" onclick="submitPayment(${order.order_id})">Submit Payment Proof</button>
+                                <button class="button" type="button" style="background:linear-gradient(135deg,#b42318,#7f1d1d);" onclick="cancelOrder(${order.order_id})">Cancel Order</button>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function readFileAsDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('Could not read payment proof file'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await fetch('http://localhost:5000/api/orders/my', {
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not load orders');
+                }
+                renderOrders(data);
+            } catch (error) {
+                ordersEl.innerHTML = `<div class="order-card"><strong>Could not load orders.</strong><div style="color:var(--muted); margin-top:8px;">${error.message}</div></div>`;
+            }
+        }
+
+        async function submitPayment(orderId) {
+            try {
+                const fileInput = document.getElementById(`payment-proof-${orderId}`);
+                const proofFile = fileInput?.files?.[0];
+                let paymentProofData = '';
+                let paymentProofName = '';
+
+                if (proofFile) {
+                    paymentProofData = await readFileAsDataUrl(proofFile);
+                    paymentProofName = proofFile.name;
+                }
+
+                const response = await fetch(`http://localhost:5000/api/orders/${orderId}/payment`, {
+                    method: 'PATCH',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        payment_reference: document.getElementById(`payment-ref-${orderId}`).value.trim(),
+                        payment_proof_name: paymentProofName,
+                        payment_proof_data: paymentProofData
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not submit payment proof');
+                }
+                setMessage(data.message, 'success');
+                loadOrders();
+            } catch (error) {
+                setMessage(error.message, 'error');
+            }
+        }
+
+        async function submitReview(orderId, productId) {
+            try {
+                const response = await fetch('http://localhost:5000/api/reviews', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        order_id: orderId,
+                        product_id: productId,
+                        rating: Number(document.getElementById(`review-rating-${orderId}-${productId}`).value),
+                        comment: document.getElementById(`review-comment-${orderId}-${productId}`).value.trim()
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not submit review');
+                }
+                setMessage(data.message, 'success');
+                loadOrders();
+            } catch (error) {
+                setMessage(error.message, 'error');
+            }
+        }
+
+        async function cancelOrder(orderId) {
+            if (!confirm('Are you sure you want to cancel this order? This cannot be undone.')) return;
+            try {
+                const response = await fetch(`http://localhost:5000/api/orders/${orderId}/cancel`, {
+                    method: 'PATCH',
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Could not cancel order');
+                setMessage(data.message, 'success');
+                loadOrders();
+            } catch (error) {
+                setMessage(error.message, 'error');
+            }
+        }
+
+        window.submitPayment = submitPayment;
+        window.submitReview = submitReview;
+        window.cancelOrder = cancelOrder;
+        document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+        document.getElementById('hamburger').addEventListener('click', function() {
+            this.classList.toggle('open');
+            document.getElementById('navActions').classList.toggle('open');
+        });
+
+        async function loadBankDetails() {
+            try {
+                const res = await fetch('http://localhost:5000/api/platform-settings');
+                const data = await res.json();
+                if (!data.bank_account_number) return;
+                const info = document.getElementById('bankInfo');
+                info.innerHTML = [
+                    data.bank_name ? `<div><span style="color:var(--muted);">Bank:</span> <strong>${data.bank_name}</strong></div>` : '',
+                    data.bank_account_name ? `<div><span style="color:var(--muted);">Account Name:</span> <strong>${data.bank_account_name}</strong></div>` : '',
+                    `<div><span style="color:var(--muted);">Account Number:</span> <strong style="font-size:1.1rem; letter-spacing:0.05em;">${data.bank_account_number}</strong></div>`,
+                    data.bank_instructions ? `<div style="margin-top:6px; color:var(--muted); font-size:0.88rem;">${data.bank_instructions}</div>` : ''
+                ].join('');
+                document.getElementById('bankBox').style.display = 'block';
+            } catch {}
+        }
+
+        if (ensureSignedIn()) {
+            loadOrders();
+            loadBankDetails();
+        }
+    </script>
+</body>
+</html>

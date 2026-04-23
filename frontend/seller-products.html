@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Products | NexoreX</title>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #f6efe5 0%, #eef5f3 48%, #e6edf4 100%);
+            --panel: rgba(255,255,255,0.92);
+            --panel-soft: rgba(255,255,255,0.75);
+            --text: #1f2933;
+            --muted: #61707a;
+            --line: rgba(15,23,42,0.1);
+            --brand: #0f766e;
+            --brand-deep: #134e4a;
+            --success: #166534;
+            --danger: #b42318;
+            --shadow: 0 24px 70px rgba(31,41,51,0.12);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            font-family: "Trebuchet MS", Verdana, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(15,118,110,0.16), transparent 30%),
+                radial-gradient(circle at bottom right, rgba(59,130,246,0.12), transparent 28%),
+                var(--bg);
+            opacity: 0;
+            animation: fadeIn 0.45s ease forwards;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 42px; }
+        .nav, .panel { background: var(--panel); border: 1px solid rgba(255,255,255,0.84); border-radius: 28px; box-shadow: var(--shadow); backdrop-filter: blur(10px); animation: slideUp 0.5s ease both; }
+        .nav { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:16px 18px; }
+        .nav-actions { display:flex; gap:10px; flex-wrap:wrap; }
+        .link, .button { font:inherit; text-decoration:none; border-radius:999px; padding:10px 16px; transition:transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease; }
+        .link { color: var(--text); }
+        .link:hover { background: rgba(31,41,51,0.06); }
+        .button { border:0; cursor:pointer; color:#fff; background:linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%); box-shadow:0 10px 24px rgba(15,118,110,0.16); }
+        .button:hover { transform:translateY(-2px); box-shadow:0 16px 32px rgba(15,118,110,0.26); }
+        .button:active { transform:translateY(0); }
+        .grid { display:grid; grid-template-columns: 0.95fr 1.05fr; gap:22px; margin-top:22px; }
+        .panel { padding:28px; }
+        form { display:grid; gap:14px; }
+        label { font-size:0.95rem; font-weight:700; }
+        input, textarea {
+            width:100%; margin-top:6px; border:1px solid var(--line); border-radius:16px; padding:14px 16px; font:inherit; background:#fff;
+        }
+        textarea { min-height:120px; resize:vertical; }
+        .message { min-height:24px; margin-top:12px; font-size:0.95rem; }
+        .message.error { color: var(--danger); }
+        .message.success { color: var(--success); }
+        .product-list { display:grid; gap:14px; margin-top:18px; }
+        .product-card { padding:16px; border-radius:22px; background:var(--panel-soft); border:1px solid rgba(15,23,42,0.08); transition:transform 0.2s ease, box-shadow 0.2s ease; }
+        .product-card:hover { transform:translateY(-3px); box-shadow:0 14px 32px rgba(31,41,51,0.1); }
+        .badge {
+            display:inline-flex; align-items:center; border-radius:999px; padding:6px 12px; font-size:0.85rem; font-weight:700; background:rgba(15,118,110,0.1); color:var(--brand);
+        }
+        .hamburger {
+            display: none; flex-direction: column; gap: 5px;
+            background: none; border: none; cursor: pointer;
+            padding: 6px; border-radius: 10px; transition: background 0.2s ease;
+        }
+        .hamburger:hover { background: rgba(31,41,51,0.07); }
+        .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: transform 0.3s ease, opacity 0.3s ease; }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+        @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+        @media (max-width: 720px) {
+            .nav { flex-wrap: wrap; }
+            .nav-actions {
+                display: none; width: 100%; flex-direction: column;
+                align-items: stretch; gap: 4px;
+                padding-top: 8px; border-top: 1px solid rgba(15,23,42,0.08);
+            }
+            .nav-actions.open { display: flex; }
+            .nav-actions a, .nav-actions button { text-align: left; border-radius: 14px; padding: 12px 14px; }
+            .hamburger { display: flex; }
+            .panel { padding: 22px; border-radius: 22px; }
+        }
+        @media (max-width: 480px) { .shell { width: calc(100% - 24px); } }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <nav class="nav">
+            <div>
+                <strong style="display:block; font-size:1.3rem; letter-spacing:0.05em; text-transform:uppercase;">NexoreX</strong>
+                <span id="navGreeting" style="color:var(--muted);">Seller product manager</span>
+            </div>
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu" type="button">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-actions" id="navActions">
+                <a class="link" href="./seller-dashboard.html">Seller Dashboard</a>
+                <a class="link" href="./seller-orders.html">Seller Orders</a>
+                <a class="link" href="./seller-wallet.html">Wallet</a>
+                <a class="link" href="./seller-notifications.html">Notifications</a>
+                <a class="link" href="./index.html">Home Feed</a>
+                <button class="button" id="logoutBtn" type="button">Logout</button>
+            </div>
+        </nav>
+
+        <section class="grid">
+            <article class="panel">
+                <h2 style="margin-top:0;">Add Product</h2>
+                <p style="color:var(--muted);">Approved sellers can submit products. New submissions go in with `pending` approval so admin can review them.</p>
+                <form id="productForm">
+                    <label>Product Name
+                        <input id="name" type="text" maxlength="100" required>
+                    </label>
+                    <label>Description
+                        <textarea id="description" maxlength="1200" required></textarea>
+                    </label>
+                    <label>Price
+                        <input id="price" type="number" min="0" step="0.01" required>
+                    </label>
+                    <label>Product Image
+                        <input id="imageFile" type="file" accept="image/png,image/jpeg,image/webp" required style="padding:10px 16px;">
+                        <div class="small" style="margin-top:6px; color:var(--muted);">JPG, PNG or WEBP · max 5MB</div>
+                    </label>
+                    <div id="imagePreviewWrap" style="display:none; margin-top:4px;">
+                        <img id="imagePreview" src="" alt="Preview" style="width:100%; max-height:200px; object-fit:cover; border-radius:14px; border:1px solid var(--line);">
+                    </div>
+                    <label>Stock Quantity
+                        <input id="stockQuantity" type="number" min="0" step="1" value="0">
+                    </label>
+                    <button class="button" id="submitBtn" type="submit">Submit Product</button>
+                </form>
+                <div id="formMessage" class="message" aria-live="polite"></div>
+            </article>
+
+            <article class="panel">
+                <h2 style="margin-top:0;">Your Product Queue</h2>
+                <div id="productList" class="product-list"></div>
+            </article>
+        </section>
+    </main>
+
+    <script src="./app.js"></script>
+    <script>
+        const navGreeting = document.getElementById('navGreeting');
+        const form = document.getElementById('productForm');
+        const formMessage = document.getElementById('formMessage');
+        const submitBtn = document.getElementById('submitBtn');
+        const productList = document.getElementById('productList');
+
+        function ensureApprovedSeller() {
+            const user = getStoredUser();
+            const token = getStoredToken();
+            if (!user || !token) {
+                window.location.href = './login.html';
+                return null;
+            }
+            if (user.role !== 'seller') {
+                window.location.href = './buyer-dashboard.html';
+                return null;
+            }
+            if (user.sellerStatus !== 'approved') {
+                window.location.href = './seller-dashboard.html';
+                return null;
+            }
+            navGreeting.textContent = `${user.name}'s product manager`;
+            return user;
+        }
+        function setMessage(text, type) {
+            formMessage.textContent = text;
+            formMessage.className = `message ${type}`;
+        }
+        function formatPrice(value) {
+            return formatMoney(value);
+        }
+        function renderProducts(products) {
+            if (!products.length) {
+                productList.innerHTML = '<div class="product-card"><strong>No products yet.</strong><div style="color:var(--muted); margin-top:6px;">Your submitted products will appear here.</div></div>';
+                return;
+            }
+            productList.innerHTML = products.map((product) => `
+                <div class="product-card">
+                    <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
+                        <strong>${product.name}</strong>
+                        <span class="badge">${product.approval_status}</span>
+                    </div>
+                    <div style="color:var(--muted); margin-top:8px;">${product.description}</div>
+                    <div style="display:flex; gap:12px; flex-wrap:wrap; color:var(--muted); margin-top:10px;">
+                        <span>Price: ${formatPrice(product.price)}</span>
+                        <span>Stock: ${product.stock_quantity}</span>
+                        <span>Status: ${product.product_status}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        async function loadSellerProducts() {
+            const user = getStoredUser();
+            try {
+                const response = await fetch(`http://localhost:5000/api/products/seller/${encodeURIComponent(user.id)}`, {
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error('Could not load seller products');
+                renderProducts(data);
+            } catch (error) {
+                productList.innerHTML = '<div class="product-card"><strong>Could not load products.</strong></div>';
+            }
+        }
+        // Image preview
+        document.getElementById('imageFile').addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('imagePreview').src = e.target.result;
+                document.getElementById('imagePreviewWrap').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const user = getStoredUser();
+            const imageFile = document.getElementById('imageFile').files[0];
+
+            if (!imageFile) {
+                setMessage('Please select a product image.', 'error');
+                return;
+            }
+
+            const name = document.getElementById('name').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const price = document.getElementById('price').value;
+
+            if (!name || !description || !price) {
+                setMessage('Please complete all required fields.', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Uploading image...';
+
+            try {
+                // Step 1 — upload image
+                const reader = new FileReader();
+                const imageData = await new Promise((resolve, reject) => {
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = () => reject(new Error('Could not read image'));
+                    reader.readAsDataURL(imageFile);
+                });
+
+                const uploadRes = await fetch('http://localhost:5000/api/products/upload-image', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ image_data: imageData, image_name: imageFile.name })
+                });
+                const uploadData = await uploadRes.json();
+                if (!uploadRes.ok) throw new Error(uploadData.message || 'Image upload failed');
+
+                // Step 2 — submit product with the saved image URL
+                submitBtn.textContent = 'Submitting product...';
+                const response = await fetch('http://localhost:5000/api/products/add', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        seller_id: user.id,
+                        name,
+                        description,
+                        price,
+                        image_url: `http://localhost:5000${uploadData.image_url}`,
+                        stock_quantity: document.getElementById('stockQuantity').value
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Could not submit product');
+
+                form.reset();
+                document.getElementById('stockQuantity').value = '0';
+                document.getElementById('imagePreviewWrap').style.display = 'none';
+                setMessage(data.message, 'success');
+                loadSellerProducts();
+            } catch (error) {
+                setMessage(error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Product';
+            }
+        });
+        document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+        document.getElementById('hamburger').addEventListener('click', function() {
+            this.classList.toggle('open');
+            document.getElementById('navActions').classList.toggle('open');
+        });
+        if (ensureApprovedSeller()) { loadSellerProducts(); }
+    </script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Orders | NexoreX</title>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #f3ece2 0%, #edf4f3 48%, #dde8ee 100%);
+            --panel: rgba(255, 255, 255, 0.92);
+            --panel-soft: rgba(255, 255, 255, 0.78);
+            --text: #1f2933;
+            --muted: #61707a;
+            --line: rgba(15, 23, 42, 0.1);
+            --brand: #9a3412;
+            --brand-deep: #7c2d12;
+            --success: #166534;
+            --danger: #b42318;
+            --shadow: 0 24px 70px rgba(31, 41, 51, 0.12);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Trebuchet MS", Verdana, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(154, 52, 18, 0.14), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.14), transparent 28%),
+                var(--bg);
+        }
+
+        .shell {
+            width: min(1120px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 24px 0 42px;
+        }
+
+        .nav, .panel {
+            background: var(--panel);
+            border: 1px solid rgba(255, 255, 255, 0.84);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 18px;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .link, .button {
+            font: inherit;
+            text-decoration: none;
+            border-radius: 999px;
+            padding: 10px 16px;
+        }
+
+        .link { color: var(--text); }
+
+        .button {
+            border: 0;
+            cursor: pointer;
+            color: #fff;
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%);
+        }
+
+        .panel {
+            margin-top: 22px;
+            padding: 28px;
+        }
+
+        .orders {
+            display: grid;
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .order-card {
+            padding: 18px;
+            border-radius: 24px;
+            background: var(--panel-soft);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+        }
+
+        .order-head, .order-meta, .order-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 6px 12px;
+            background: rgba(154, 52, 18, 0.12);
+            color: var(--brand);
+            font-weight: 700;
+            font-size: 0.86rem;
+        }
+
+        .message {
+            min-height: 24px;
+            margin-top: 12px;
+            font-size: 0.95rem;
+        }
+
+        .message.error { color: var(--danger); }
+        .message.success { color: var(--success); }
+
+        .small {
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        @media (max-width: 640px) {
+            .shell { width: min(100% - 20px, 1120px); }
+            .nav { flex-direction: column; align-items: start; }
+            .panel { padding: 22px; border-radius: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <nav class="nav">
+            <div>
+                <strong style="display:block; font-size:1.3rem; letter-spacing:0.05em; text-transform:uppercase;">NexoreX</strong>
+                <span class="small">Seller order management</span>
+            </div>
+            <div class="nav-actions">
+                <a class="link" href="./seller-dashboard.html">Seller Dashboard</a>
+                <a class="link" href="./seller-products.html">Manage Products</a>
+                <a class="link" href="./seller-wallet.html">Wallet</a>
+                <a class="link" href="./seller-notifications.html">Notifications</a>
+                <a class="link" href="./index.html">Home Feed</a>
+                <button class="button" id="logoutBtn" type="button">Logout</button>
+            </div>
+        </nav>
+
+        <section class="panel">
+            <h2 style="margin-top:0;">Your Orders</h2>
+            <p class="small">Once admin confirms payment, you can move each order through processing, shipping, and delivery from here.</p>
+            <div id="topMessage" class="message" aria-live="polite"></div>
+            <div id="orders" class="orders"></div>
+        </section>
+    </main>
+
+    <script src="./app.js"></script>
+    <script>
+        const ordersEl = document.getElementById('orders');
+        const topMessage = document.getElementById('topMessage');
+
+        function ensureSeller() {
+            const user = getStoredUser();
+            const token = getStoredToken();
+
+            if (!user || !token) {
+                window.location.href = './login.html';
+                return null;
+            }
+
+            if (user.role === 'admin') {
+                window.location.href = './admin-dashboard.html';
+                return null;
+            }
+
+            if (user.role !== 'seller') {
+                window.location.href = './buyer-dashboard.html';
+                return null;
+            }
+
+            if (user.sellerStatus !== 'approved') {
+                window.location.href = './seller-dashboard.html';
+                return null;
+            }
+
+            return user;
+        }
+
+        function setMessage(text, type) {
+            topMessage.textContent = text;
+            topMessage.className = `message ${type}`;
+        }
+
+        function formatPrice(value) {
+            return formatMoney(value);
+        }
+
+        function formatDate(value) {
+            return formatDateTime(value);
+        }
+
+        function nextStatusAction(status) {
+            const flow = {
+                payment_confirmed: 'processing',
+                processing: 'shipped',
+                shipped: 'delivered'
+            };
+
+            return flow[status] || '';
+        }
+
+        function labelForStatus(status) {
+            const labels = {
+                processing: 'Mark Processing',
+                shipped: 'Mark Shipped',
+                delivered: 'Mark Delivered'
+            };
+
+            return labels[status] || '';
+        }
+
+        function renderOrders(orders) {
+            if (!orders.length) {
+                ordersEl.innerHTML = `
+                    <div class="order-card">
+                        <strong>No seller orders yet.</strong>
+                        <div class="small">Paid buyer orders will appear here as soon as they are assigned to your store.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            ordersEl.innerHTML = orders.map((order) => {
+                const nextStatus = nextStatusAction(order.status);
+
+                return `
+                    <div class="order-card">
+                        <div class="order-head">
+                            <div>
+                                <strong>Order #${order.order_id}</strong>
+                                <div class="small">Created: ${formatDate(order.created_at)}</div>
+                            </div>
+                            <span class="badge">${order.status}</span>
+                        </div>
+                        <div class="order-meta" style="margin-top:12px;">
+                            <span class="small">Buyer #${order.buyer_id}</span>
+                            <span class="small">Total: ${formatPrice(order.total_amount)}</span>
+                            <span class="small">Seller credit: ${formatPrice(order.seller_amount)}</span>
+                        </div>
+                        <div style="margin-top:12px;">
+                            ${order.items.map((item) => `
+                                <div style="padding:10px 0; border-top:1px solid rgba(15, 23, 42, 0.08);">
+                                    <strong>${item.product_name}</strong>
+                                    <div class="small">${item.quantity} x ${formatPrice(item.unit_price)}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <p class="small" style="margin:12px 0 0;">Delivery address: ${order.delivery_address || 'Not provided'}</p>
+                        <p class="small" style="margin:6px 0 0;">Payment reference: ${order.payment_reference || 'Waiting for buyer proof'}</p>
+                        ${order.payment_proof_url ? `<p class="small" style="margin:6px 0 0;"><a href="http://localhost:5000${order.payment_proof_url}" target="_blank" rel="noopener noreferrer">View uploaded payment proof</a></p>` : ''}
+                        <div class="order-actions" style="margin-top:14px;">
+                            <span class="small">Last updated: ${formatDate(order.updated_at)}</span>
+                            ${nextStatus ? `<button class="button" type="button" onclick="moveOrder(${order.order_id}, '${nextStatus}')">${labelForStatus(nextStatus)}</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await fetch('http://localhost:5000/api/orders/my', {
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not load seller orders');
+                }
+
+                renderOrders(data);
+            } catch (error) {
+                ordersEl.innerHTML = `
+                    <div class="order-card">
+                        <strong>Could not load seller orders.</strong>
+                        <div class="small">${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        async function moveOrder(orderId, status) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
+                    method: 'PATCH',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ status })
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not update order status');
+                }
+
+                setMessage(data.message, 'success');
+                loadOrders();
+            } catch (error) {
+                setMessage(error.message, 'error');
+            }
+        }
+
+        window.moveOrder = moveOrder;
+        document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+
+        if (ensureSeller()) {
+            loadOrders();
+        }
+    </script>
+</body>
+</html>

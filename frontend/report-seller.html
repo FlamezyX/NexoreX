@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Seller | NexoreX</title>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #f6efe5 0%, #f6f5ef 32%, #dce7ea 100%);
+            --surface: rgba(255,255,255,0.88);
+            --surface-strong: rgba(255,255,255,0.96);
+            --text: #1f2933;
+            --muted: #5f6b73;
+            --line: rgba(15,23,42,0.1);
+            --brand: #c05621;
+            --brand-deep: #7c2d12;
+            --teal: #0f766e;
+            --danger: #b42318;
+            --success: #166534;
+            --shadow: 0 28px 80px rgba(31,41,51,0.12);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Georgia, "Times New Roman", serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(192,86,33,0.14), transparent 30%),
+                radial-gradient(circle at top right, rgba(15,118,110,0.16), transparent 34%),
+                var(--bg);
+            min-height: 100vh;
+        }
+
+        .shell { width: min(860px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 48px; }
+
+        .nav {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 16px; padding: 14px 18px;
+            background: rgba(255,255,255,0.72);
+            border: 1px solid rgba(255,255,255,0.8);
+            border-radius: 24px; backdrop-filter: blur(12px);
+            box-shadow: 0 16px 50px rgba(31,41,51,0.08);
+        }
+
+        .brand strong { font-size: 1.35rem; letter-spacing: 0.06em; text-transform: uppercase; }
+        .brand span { color: var(--muted); font-size: 0.92rem; }
+        .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+        .link {
+            color: var(--text); text-decoration: none;
+            padding: 10px 14px; border-radius: 999px;
+            font: inherit; transition: background 0.2s;
+        }
+        .link:hover { background: rgba(31,41,51,0.06); }
+
+        .button {
+            border: 0; border-radius: 999px; padding: 11px 20px;
+            cursor: pointer; color: #fff; font: inherit; text-decoration: none;
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%);
+            box-shadow: 0 12px 25px rgba(124,45,18,0.18);
+        }
+
+        .button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .button.ghost {
+            background: rgba(255,255,255,0.55);
+            border: 1px solid var(--line);
+            color: var(--text); box-shadow: none;
+        }
+
+        .card {
+            margin-top: 28px;
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,0.75);
+            border-radius: 30px;
+            padding: 36px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .card-head { margin-bottom: 28px; }
+        .card-head h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.1; margin-bottom: 10px; }
+        .card-head p { color: var(--muted); line-height: 1.7; max-width: 58ch; }
+
+        .seller-banner {
+            display: flex; align-items: center; gap: 14px;
+            padding: 16px 20px; border-radius: 20px;
+            background: rgba(192,86,33,0.07);
+            border: 1px solid rgba(192,86,33,0.15);
+            margin-bottom: 28px;
+        }
+
+        .seller-avatar {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--brand), var(--teal));
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.2rem; font-weight: 700; flex-shrink: 0;
+        }
+
+        .seller-banner strong { display: block; font-size: 1.05rem; }
+        .seller-banner span { color: var(--muted); font-size: 0.9rem; }
+
+        .form-grid { display: grid; gap: 20px; }
+
+        .field label {
+            display: block; font-weight: 700;
+            font-size: 0.95rem; margin-bottom: 8px;
+        }
+
+        .field label span { color: var(--muted); font-weight: 400; font-size: 0.88rem; margin-left: 6px; }
+
+        .field select,
+        .field textarea {
+            width: 100%; border: 1px solid var(--line);
+            border-radius: 16px; padding: 14px 16px;
+            font: inherit; font-size: 0.95rem;
+            background: var(--surface-strong);
+            outline: none; transition: border-color 0.2s;
+        }
+
+        .field select:focus,
+        .field textarea:focus { border-color: var(--brand); }
+
+        .field textarea { min-height: 140px; resize: vertical; }
+
+        .reason-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .reason-option {
+            display: flex; align-items: center; gap: 10px;
+            padding: 14px 16px; border-radius: 16px;
+            border: 1px solid var(--line);
+            background: var(--surface-strong);
+            cursor: pointer; transition: all 0.15s;
+        }
+
+        .reason-option:hover { border-color: var(--brand); background: rgba(192,86,33,0.05); }
+        .reason-option input[type="radio"] { accent-color: var(--brand); width: 16px; height: 16px; flex-shrink: 0; }
+        .reason-option.selected { border-color: var(--brand); background: rgba(192,86,33,0.08); }
+
+        .reason-label strong { display: block; font-size: 0.92rem; }
+        .reason-label span { color: var(--muted); font-size: 0.82rem; }
+
+        .warning-box {
+            padding: 16px 20px; border-radius: 18px;
+            background: rgba(180,35,24,0.06);
+            border: 1px solid rgba(180,35,24,0.15);
+            color: var(--danger); font-size: 0.9rem; line-height: 1.6;
+        }
+
+        .form-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+        .message {
+            padding: 14px 18px; border-radius: 16px;
+            font-size: 0.95rem; line-height: 1.6; display: none;
+        }
+
+        .message.error { background: rgba(180,35,24,0.08); border: 1px solid rgba(180,35,24,0.2); color: var(--danger); display: block; }
+        .message.success { background: rgba(22,101,52,0.08); border: 1px solid rgba(22,101,52,0.2); color: var(--success); display: block; }
+
+        @media (max-width: 600px) {
+            .card { padding: 24px; border-radius: 24px; }
+            .reason-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <nav class="nav">
+            <div class="brand">
+                <strong>NexoreX</strong>
+                <span>Report a Seller</span>
+            </div>
+            <div class="nav-actions">
+                <a class="link" href="./index.html">Home</a>
+                <a class="link" href="./buyer-dashboard.html">Dashboard</a>
+            </div>
+        </nav>
+
+        <div class="card">
+            <div class="card-head">
+                <h1>Report a Seller</h1>
+                <p>
+                    If a seller has behaved inappropriately, listed misleading products, or you suspect fraud,
+                    you can report them here. All reports are reviewed by the Nexore admin team.
+                </p>
+            </div>
+
+            <div class="seller-banner" id="sellerBanner" style="display:none;">
+                <div class="seller-avatar" id="sellerAvatar">?</div>
+                <div>
+                    <strong id="sellerName">Loading seller...</strong>
+                    <span id="sellerMeta">Seller account</span>
+                </div>
+            </div>
+
+            <form id="reportForm" class="form-grid">
+                <div class="field">
+                    <label>Reason for report <span>Select the category that best describes the issue</span></label>
+                    <div class="reason-grid" id="reasonGrid">
+                        <label class="reason-option" id="opt_fake_listing">
+                            <input type="radio" name="reason" value="fake_listing">
+                            <div class="reason-label">
+                                <strong>Fake / Misleading Listing</strong>
+                                <span>Product doesn't match description or images</span>
+                            </div>
+                        </label>
+                        <label class="reason-option" id="opt_item_not_as_described">
+                            <input type="radio" name="reason" value="item_not_as_described">
+                            <div class="reason-label">
+                                <strong>Item Not As Described</strong>
+                                <span>Received item was different from what was listed</span>
+                            </div>
+                        </label>
+                        <label class="reason-option" id="opt_rude_behaviour">
+                            <input type="radio" name="reason" value="rude_behaviour">
+                            <div class="reason-label">
+                                <strong>Rude / Unprofessional Behaviour</strong>
+                                <span>Seller was abusive or disrespectful in chat</span>
+                            </div>
+                        </label>
+                        <label class="reason-option" id="opt_suspected_scam">
+                            <input type="radio" name="reason" value="suspected_scam">
+                            <div class="reason-label">
+                                <strong>Suspected Scam / Fraud</strong>
+                                <span>Seller appears to be operating fraudulently</span>
+                            </div>
+                        </label>
+                        <label class="reason-option" id="opt_other">
+                            <input type="radio" name="reason" value="other">
+                            <div class="reason-label">
+                                <strong>Other</strong>
+                                <span>Something else not listed above</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="description">
+                        Describe what happened
+                        <span>Be as specific as possible — include order numbers, dates, or chat details if relevant</span>
+                    </label>
+                    <textarea id="description" maxlength="2000"
+                        placeholder="Describe the issue in detail..."></textarea>
+                </div>
+
+                <div class="warning-box">
+                    ⚠️ False or malicious reports are taken seriously. Only submit a report if you genuinely
+                    experienced an issue with this seller.
+                </div>
+
+                <div id="formMessage" class="message"></div>
+
+                <div class="form-actions">
+                    <button class="button" type="submit" id="submitBtn">Submit Report</button>
+                    <a class="button ghost" href="./buyer-dashboard.html">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="./app.js"></script>
+    <script>
+        const API = 'http://localhost:5000';
+        const params = new URLSearchParams(window.location.search);
+        const sellerId = params.get('seller');
+        const formMessage = document.getElementById('formMessage');
+        const submitBtn = document.getElementById('submitBtn');
+
+        function showMessage(text, type) {
+            formMessage.textContent = text;
+            formMessage.className = `message ${type}`;
+        }
+
+        function init() {
+            const user = getStoredUser();
+            const token = getStoredToken();
+
+            if (!user || !token) {
+                window.location.href = './login.html';
+                return;
+            }
+
+            if (user.role !== 'buyer') {
+                window.location.href = './buyer-dashboard.html';
+                return;
+            }
+
+            if (!sellerId) {
+                showMessage('No seller specified. Please go back and try again.', 'error');
+                submitBtn.disabled = true;
+                return;
+            }
+
+            loadSellerInfo();
+            setupReasonHighlight();
+        }
+
+        async function loadSellerInfo() {
+            try {
+                const res = await fetch(`${API}/api/products/seller-profile/${encodeURIComponent(sellerId)}`);
+                if (!res.ok) throw new Error('Seller not found');
+                const data = await res.json();
+                const seller = data.seller;
+
+                const banner = document.getElementById('sellerBanner');
+                const avatar = document.getElementById('sellerAvatar');
+                const nameEl = document.getElementById('sellerName');
+                const metaEl = document.getElementById('sellerMeta');
+
+                avatar.textContent = seller.fullname.charAt(0).toUpperCase();
+                nameEl.textContent = seller.fullname;
+                metaEl.textContent = `${seller.location || 'Location not set'} · ${data.products.length} product${data.products.length === 1 ? '' : 's'}`;
+                banner.style.display = 'flex';
+            } catch {
+                document.getElementById('sellerBanner').style.display = 'none';
+            }
+        }
+
+        function setupReasonHighlight() {
+            document.querySelectorAll('input[name="reason"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    document.querySelectorAll('.reason-option').forEach(opt => opt.classList.remove('selected'));
+                    radio.closest('.reason-option').classList.add('selected');
+                });
+            });
+        }
+
+        document.getElementById('reportForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const reason = document.querySelector('input[name="reason"]:checked')?.value;
+            const description = document.getElementById('description').value.trim();
+
+            if (!reason) {
+                showMessage('Please select a reason for your report.', 'error');
+                return;
+            }
+
+            if (!description || description.length < 20) {
+                showMessage('Please provide a description of at least 20 characters.', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            try {
+                const res = await fetch(`${API}/api/reports`, {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ seller_id: Number(sellerId), reason, description })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showMessage(data.message || 'Could not submit report.', 'error');
+                    return;
+                }
+
+                showMessage(data.message, 'success');
+                document.getElementById('reportForm').reset();
+                document.querySelectorAll('.reason-option').forEach(opt => opt.classList.remove('selected'));
+
+                setTimeout(() => {
+                    window.location.href = './buyer-dashboard.html';
+                }, 2500);
+            } catch {
+                showMessage('Could not connect to the server. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Report';
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>

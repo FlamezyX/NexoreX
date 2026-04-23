@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Store | NexoreX</title>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #f6efe5 0%, #f6f5ef 32%, #dce7ea 100%);
+            --panel: rgba(255,255,255,0.92);
+            --panel-soft: rgba(255,255,255,0.78);
+            --text: #1f2933;
+            --muted: #5f6b73;
+            --line: rgba(15,23,42,0.1);
+            --brand: #c05621;
+            --brand-deep: #7c2d12;
+            --accent: #0f766e;
+            --shadow: 0 24px 70px rgba(31,41,51,0.12);
+        }
+        * { box-sizing:border-box; }
+        body { margin:0; min-height:100vh; font-family:Georgia, "Times New Roman", serif; color:var(--text); background:var(--bg); }
+        .shell { width:min(1160px, calc(100% - 32px)); margin:0 auto; padding:24px 0 42px; }
+        .nav, .panel { background:var(--panel); border:1px solid rgba(255,255,255,0.84); border-radius:28px; box-shadow:var(--shadow); backdrop-filter:blur(10px); }
+        .nav { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:16px 18px; }
+        .nav-actions { display:flex; gap:10px; flex-wrap:wrap; }
+        .link, .button { font:inherit; text-decoration:none; border-radius:999px; padding:10px 16px; }
+        .link { color:var(--text); }
+        .button { border:0; cursor:pointer; color:#fff; background:linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%); }
+        .button.whatsapp { background:linear-gradient(135deg, #25d366, #128c7e); }
+        .button.ghost { background:rgba(255,255,255,0.55); border:1px solid var(--line); color:var(--text); }
+        .contact-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+        .hero, .grid { display:grid; gap:22px; margin-top:22px; }
+        .hero { grid-template-columns:1fr 1fr; }
+        .grid { grid-template-columns:1fr 1fr; }
+        .panel { padding:28px; }
+        .stats { display:grid; gap:14px; }
+        .stat { padding:18px; border-radius:22px; background:var(--panel-soft); border:1px solid rgba(15,23,42,0.08); }
+        .stat strong { display:block; font-size:1.7rem; margin-bottom:4px; }
+        .list, .products { display:grid; gap:14px; margin-top:18px; }
+        .item, .product-card { padding:18px; border-radius:22px; background:var(--panel-soft); border:1px solid rgba(15,23,42,0.08); }
+        .small { color:var(--muted); line-height:1.6; }
+        .product-card img { width:100%; height:180px; object-fit:cover; border-radius:18px; background:#ebe7e0; margin-bottom:12px; }
+        @media (max-width: 980px) { .hero, .grid { grid-template-columns:1fr; } }
+        @media (max-width: 640px) { .shell { width:min(100% - 20px, 1160px); } .nav { flex-direction:column; align-items:start; } .panel { padding:22px; border-radius:24px; } }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <nav class="nav">
+            <div>
+                <strong style="display:block; font-size:1.3rem; letter-spacing:0.05em; text-transform:uppercase;">NexoreX</strong>
+                <span class="small">Seller storefront</span>
+            </div>
+            <div class="nav-actions">
+                <a class="link" href="./index.html">Home Feed</a>
+                <a class="link" href="./buyer-dashboard.html">Buyer Dashboard</a>
+            </div>
+        </nav>
+
+        <section class="hero">
+            <article class="panel">
+                <h1 id="sellerName" style="margin:0; font-size:clamp(2rem, 5vw, 4rem); line-height:0.98;">Seller Store</h1>
+                <p id="sellerMeta" class="small" style="margin-top:16px;">Loading seller details...</p>
+                <div class="contact-actions" id="contactActions"></div>
+            </article>
+            <aside class="panel">
+                <div class="stats">
+                    <div class="stat"><strong id="sellerRating">0.0</strong><span>Average rating</span></div>
+                    <div class="stat"><strong id="sellerReviews">0</strong><span>Published reviews</span></div>
+                    <div class="stat"><strong id="sellerProducts">0</strong><span>Live products</span></div>
+                </div>
+            </aside>
+        </section>
+
+        <section class="grid">
+            <article class="panel">
+                <h2 style="margin-top:0;">Store Reviews</h2>
+                <div id="reviewList" class="list"></div>
+            </article>
+
+            <article class="panel">
+                <h2 style="margin-top:0;">Products From This Seller</h2>
+                <div id="productList" class="products"></div>
+            </article>
+        </section>
+    </main>
+
+    <script src="./app.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const sellerId = params.get('seller');
+        const sellerNameEl = document.getElementById('sellerName');
+        const sellerMetaEl = document.getElementById('sellerMeta');
+        const sellerRatingEl = document.getElementById('sellerRating');
+        const sellerReviewsEl = document.getElementById('sellerReviews');
+        const sellerProductsEl = document.getElementById('sellerProducts');
+        const reviewListEl = document.getElementById('reviewList');
+        const productListEl = document.getElementById('productList');
+
+        function formatPrice(value) {
+            return formatMoney(value);
+        }
+
+        function formatDate(value) {
+            return formatDateShort(value);
+        }
+
+        async function loadStore() {
+            if (!sellerId) {
+                sellerNameEl.textContent = 'Seller not found';
+                sellerMetaEl.textContent = 'No seller id was provided.';
+                return;
+            }
+
+            try {
+                const profileResponse = await fetch(`http://localhost:5000/api/products/seller-profile/${encodeURIComponent(sellerId)}`);
+                const profileData = await profileResponse.json();
+
+                if (!profileResponse.ok) {
+                    throw new Error(profileData.message || 'Could not load seller store');
+                }
+
+                const seller = profileData.seller;
+                sellerNameEl.textContent = seller.fullname;
+                sellerMetaEl.textContent = `${seller.location || 'Location not added'} | Joined ${formatDate(seller.created_at)}`;
+                sellerRatingEl.textContent = Number(seller.average_rating || 0).toFixed(1);
+                sellerReviewsEl.textContent = String(seller.review_count || 0);
+                sellerProductsEl.textContent = String(profileData.products.length);
+
+                // Contact buttons
+                const currentUser = getStoredUser();
+                const contactActions = document.getElementById('contactActions');
+                let contactHtml = '';
+                if (currentUser && currentUser.id !== Number(sellerId)) {
+                    contactHtml += `<a class="button" href="./chat.html?with=${sellerId}" style="text-decoration:none;">💬 Message Seller</a>`;
+                    contactHtml += `<a class="button ghost" href="./report-seller.html?seller=${sellerId}" style="text-decoration:none; color:#b42318; border-color:rgba(180,35,24,0.3);">🚩 Report Seller</a>`;
+                }
+                if (seller.phone) {
+                    const waNumber = seller.phone.replace(/\D/g, '');
+                    contactHtml += `<a class="button whatsapp" href="https://wa.me/${waNumber}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">📱 WhatsApp</a>`;
+                }
+                contactActions.innerHTML = contactHtml;
+
+                productListEl.innerHTML = profileData.products.length ? profileData.products.map((product) => `
+                    <div class="product-card">
+                        <img src="${product.image_url}" alt="${product.name}">
+                        <strong>${product.name}</strong>
+                        <div class="small" style="margin-top:8px;">${product.description}</div>
+                        <div class="small" style="margin-top:8px;">${formatPrice(product.price)} | ${Number(product.average_rating || 0).toFixed(1)} stars | ${product.review_count} reviews</div>
+                    </div>
+                `).join('') : '<div class="item"><strong>No products yet.</strong><div class="small">This seller has no approved products on the store page.</div></div>';
+
+                const allReviews = [];
+                for (const product of profileData.products) {
+                    const response = await fetch(`http://localhost:5000/api/reviews/product/${product.product_id}`);
+                    const reviews = await response.json();
+                    if (response.ok && Array.isArray(reviews)) {
+                        reviews.forEach((review) => {
+                            allReviews.push({
+                                ...review,
+                                product_name: product.name
+                            });
+                        });
+                    }
+                }
+
+                reviewListEl.innerHTML = allReviews.length ? allReviews.slice(0, 12).map((review) => `
+                    <div class="item">
+                        <strong>${review.buyer_name}</strong>
+                        <div class="small">${review.product_name} | ${review.rating}/5 | ${formatDate(review.created_at)}</div>
+                        <div class="small" style="margin-top:8px;">${review.comment || 'No comment added.'}</div>
+                    </div>
+                `).join('') : '<div class="item"><strong>No published reviews yet.</strong><div class="small">Buyer feedback will appear here after delivered orders are reviewed.</div></div>';
+            } catch (error) {
+                sellerNameEl.textContent = 'Could not load seller store';
+                sellerMetaEl.textContent = error.message;
+            }
+        }
+
+        loadStore();
+    </script>
+</body>
+</html>

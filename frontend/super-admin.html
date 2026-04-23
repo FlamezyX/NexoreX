@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Team | NexoreX</title>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #eef3f8 0%, #f7efe3 48%, #e8efe8 100%);
+            --panel: rgba(255,255,255,0.92);
+            --panel-soft: rgba(255,255,255,0.76);
+            --text: #1f2933;
+            --muted: #61707a;
+            --line: rgba(15,23,42,0.1);
+            --brand: #1d4ed8;
+            --brand-deep: #1e3a8a;
+            --success: #166534;
+            --danger: #b42318;
+            --gold: #92400e;
+            --gold-bg: rgba(146,64,14,0.08);
+            --shadow: 0 24px 70px rgba(31,41,51,0.12);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: "Trebuchet MS", Verdana, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top right, rgba(29,78,216,0.14), transparent 30%),
+                radial-gradient(circle at bottom left, rgba(34,197,94,0.12), transparent 28%),
+                var(--bg);
+            min-height: 100vh;
+        }
+
+        .shell { width: min(1100px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 48px; }
+
+        .nav, .panel {
+            background: var(--panel);
+            border: 1px solid rgba(255,255,255,0.84);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav {
+            display: flex; justify-content: space-between;
+            align-items: center; gap: 16px; padding: 16px 18px;
+        }
+
+        .nav-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        .link, .button {
+            font: inherit; text-decoration: none;
+            border-radius: 999px; padding: 10px 16px;
+        }
+
+        .link { color: var(--text); }
+
+        .button {
+            border: 0; cursor: pointer; color: #fff;
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%);
+        }
+
+        .button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .button.danger { background: linear-gradient(135deg, var(--danger), #7f1d1d); }
+        .button.success { background: linear-gradient(135deg, var(--success), #14532d); }
+        .button.ghost { background: rgba(255,255,255,0.55); border: 1px solid var(--line); color: var(--text); }
+
+        .grid { display: grid; gap: 22px; margin-top: 22px; }
+        .two-col { grid-template-columns: 1fr 1fr; }
+        .panel { padding: 28px; }
+
+        .headline {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            line-height: 1; margin-bottom: 12px;
+        }
+
+        .small { color: var(--muted); line-height: 1.7; font-size: 0.92rem; }
+
+        .message { min-height: 22px; margin-top: 12px; font-size: 0.95rem; }
+        .message.error { color: var(--danger); }
+        .message.success { color: var(--success); }
+
+        /* Admin cards */
+        .admin-list { display: grid; gap: 16px; margin-top: 18px; }
+
+        .admin-card {
+            padding: 20px; border-radius: 22px;
+            background: var(--panel-soft);
+            border: 1px solid rgba(15,23,42,0.08);
+        }
+
+        .admin-card.super {
+            background: var(--gold-bg);
+            border-color: rgba(146,64,14,0.2);
+        }
+
+        .admin-head {
+            display: flex; justify-content: space-between;
+            align-items: center; gap: 12px; flex-wrap: wrap;
+        }
+
+        .admin-avatar {
+            width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.1rem; font-weight: 700; flex-shrink: 0;
+            background: linear-gradient(135deg, var(--brand), var(--brand-deep));
+        }
+
+        .admin-card.super .admin-avatar {
+            background: linear-gradient(135deg, #92400e, #78350f);
+        }
+
+        .admin-info { flex: 1; }
+        .admin-info strong { display: block; font-size: 1rem; }
+        .admin-info span { color: var(--muted); font-size: 0.88rem; }
+
+        .badge {
+            display: inline-flex; align-items: center;
+            border-radius: 999px; padding: 5px 12px;
+            font-weight: 700; font-size: 0.82rem;
+        }
+
+        .badge.super { background: var(--gold-bg); color: var(--gold); }
+        .badge.sub { background: rgba(29,78,216,0.1); color: var(--brand); }
+
+        /* Permissions grid */
+        .perm-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .perm-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 12px; border-radius: 12px;
+            border: 1px solid var(--line);
+            background: rgba(255,255,255,0.6);
+            font-size: 0.88rem; cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .perm-item input[type="checkbox"] { accent-color: var(--brand); width: 15px; height: 15px; flex-shrink: 0; }
+        .perm-item:has(input:checked) { border-color: var(--brand); background: rgba(29,78,216,0.06); }
+
+        .admin-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+        /* Promote form */
+        .search-wrap { position: relative; }
+
+        .search-input {
+            width: 100%; border: 1px solid var(--line);
+            border-radius: 16px; padding: 13px 16px;
+            font: inherit; font-size: 0.95rem;
+            background: rgba(255,255,255,0.9);
+            outline: none; transition: border-color 0.2s;
+        }
+
+        .search-input:focus { border-color: var(--brand); }
+
+        .search-results {
+            position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+            background: var(--panel); border: 1px solid var(--line);
+            border-radius: 16px; box-shadow: var(--shadow);
+            z-index: 10; overflow: hidden; display: none;
+        }
+
+        .search-results.open { display: block; }
+
+        .search-result-item {
+            padding: 12px 16px; cursor: pointer;
+            transition: background 0.15s; border-bottom: 1px solid var(--line);
+            font-size: 0.92rem;
+        }
+
+        .search-result-item:last-child { border-bottom: none; }
+        .search-result-item:hover { background: rgba(29,78,216,0.06); }
+        .search-result-item strong { display: block; }
+        .search-result-item span { color: var(--muted); font-size: 0.85rem; }
+
+        .selected-user {
+            padding: 12px 16px; border-radius: 14px;
+            background: rgba(29,78,216,0.07);
+            border: 1px solid rgba(29,78,216,0.2);
+            margin-top: 10px; display: none;
+        }
+
+        .selected-user.visible { display: block; }
+        .selected-user strong { display: block; }
+        .selected-user span { color: var(--muted); font-size: 0.88rem; }
+
+        .form-label { font-weight: 700; font-size: 0.95rem; margin-bottom: 8px; display: block; margin-top: 16px; }
+
+        @media (max-width: 780px) {
+            .two-col { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 640px) {
+            .shell { width: min(100% - 20px, 1100px); }
+            .nav { flex-direction: column; align-items: start; }
+            .panel { padding: 22px; border-radius: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <nav class="nav">
+            <div>
+                <strong style="display:block; font-size:1.3rem; letter-spacing:0.05em; text-transform:uppercase;">NexoreX</strong>
+                <span class="small">Admin Team Management</span>
+            </div>
+            <div class="nav-actions">
+                <a class="link" href="./admin-dashboard.html">Admin Dashboard</a>
+                <a class="link" href="./index.html">Home</a>
+                <button class="button danger" id="logoutBtn" type="button">Logout</button>
+            </div>
+        </nav>
+
+        <div class="grid" style="grid-template-columns:1fr; margin-top:22px;">
+            <div class="panel">
+                <h1 class="headline">Admin Team</h1>
+                <p class="small">You are the super admin. Promote trusted people to sub-admins and control exactly what each one can manage. Promo settings are always yours alone.</p>
+                <div id="topMessage" class="message" aria-live="polite"></div>
+            </div>
+        </div>
+
+        <div class="grid two-col">
+            <!-- Current admin team -->
+            <div class="panel">
+                <h2 style="margin-bottom:6px;">Current Admin Team</h2>
+                <p class="small">Super admin has full access. Sub-admins only see what you allow.</p>
+                <div id="adminList" class="admin-list">
+                    <div class="admin-card"><span class="small">Loading admin team...</span></div>
+                </div>
+            </div>
+
+            <!-- Promote new sub-admin -->
+            <div class="panel">
+                <h2 style="margin-bottom:6px;">Promote a Sub-Admin</h2>
+                <p class="small">Search for a buyer or seller by name or email, select their permissions, and promote them.</p>
+
+                <label class="form-label" for="userSearch">Search user</label>
+                <div class="search-wrap">
+                    <input class="search-input" id="userSearch" type="text"
+                        placeholder="Type a name or email..." autocomplete="off">
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+
+                <div class="selected-user" id="selectedUser">
+                    <strong id="selectedName">-</strong>
+                    <span id="selectedEmail">-</span>
+                </div>
+
+                <label class="form-label">Permissions to grant</label>
+                <div class="perm-grid" id="promotePermGrid">
+                    <label class="perm-item"><input type="checkbox" value="manage_applications"> Seller Applications</label>
+                    <label class="perm-item"><input type="checkbox" value="manage_products"> Product Approvals</label>
+                    <label class="perm-item"><input type="checkbox" value="manage_orders"> Payment Confirmations</label>
+                    <label class="perm-item"><input type="checkbox" value="manage_withdrawals"> Withdrawals</label>
+                    <label class="perm-item"><input type="checkbox" value="manage_shipping"> Shipping Options</label>
+                    <label class="perm-item"><input type="checkbox" value="manage_reviews"> Review Moderation</label>
+                    <label class="perm-item"><input type="checkbox" value="manage_reports"> Seller Reports</label>
+                    <label class="perm-item"><input type="checkbox" value="view_analytics"> Analytics</label>
+                </div>
+
+                <div style="margin-top:18px;">
+                    <button class="button" id="promoteBtn" type="button" disabled>Promote to Sub-Admin</button>
+                </div>
+                <div id="promoteMessage" class="message" aria-live="polite"></div>
+            </div>
+        </div>
+
+        <!-- Bank details -->
+        <div class="grid" style="grid-template-columns:1fr; margin-top:22px;">
+            <div class="panel">
+                <h2 style="margin-bottom:6px;">Platform Bank Details</h2>
+                <p class="small">This is the account buyers are instructed to transfer payments to. Update it here anytime — changes reflect immediately on checkout and orders pages.</p>
+                <form id="bankForm" style="display:grid; gap:14px; margin-top:18px;">
+                    <label class="form-label" style="margin-top:0;">Bank Name
+                        <input class="search-input" id="bankName" type="text" maxlength="100" placeholder="e.g. First Bank">
+                    </label>
+                    <label class="form-label" style="margin-top:0;">Account Name
+                        <input class="search-input" id="bankAccountName" type="text" maxlength="150" placeholder="e.g. NexoreX Marketplace">
+                    </label>
+                    <label class="form-label" style="margin-top:0;">Account Number
+                        <input class="search-input" id="bankAccountNumber" type="text" maxlength="20" placeholder="e.g. 0123456789">
+                    </label>
+                    <label class="form-label" style="margin-top:0;">Payment Instructions
+                        <input class="search-input" id="bankInstructions" type="text" maxlength="300" placeholder="e.g. Use your Order ID as the transfer reference">
+                    </label>
+                    <label class="form-label" style="margin-top:0;">Withdrawal Hold Period (hours after delivery)
+                        <input class="search-input" id="withdrawalHoldHours" type="number" min="0" max="720" placeholder="e.g. 24">
+                        <div class="small" style="margin-top:6px;">Sellers cannot withdraw until this many hours after their order is marked delivered. Set to 0 to allow immediate withdrawal.</div>
+                    </label>
+                    <label class="form-label" style="margin-top:0;">Minimum Withdrawal Amount (₦)
+                        <input class="search-input" id="minWithdrawalAmount" type="number" min="0" step="100" placeholder="e.g. 1000">
+                        <div class="small" style="margin-top:6px;">Sellers cannot request a withdrawal below this amount.</div>
+                    </label>
+                    <div>
+                        <button class="button" id="bankSaveBtn" type="submit">Save Bank Details</button>
+                    </div>
+                </form>
+                <div id="bankMessage" class="message" aria-live="polite"></div>
+            </div>
+        </div>
+
+        <!-- Message team / sellers -->
+        <div class="grid" style="grid-template-columns:1fr; margin-top:22px;">
+            <div class="panel">
+                <h2 style="margin-bottom:6px;">Message a Sub-Admin or Seller</h2>
+                <p class="small">Search for any sub-admin or seller and open a direct chat with them.</p>
+
+                <label class="form-label" for="chatSearch">Search sub-admins &amp; sellers</label>
+                <div class="search-wrap">
+                    <input class="search-input" id="chatSearch" type="text"
+                        placeholder="Type a name or email..." autocomplete="off">
+                    <div class="search-results" id="chatSearchResults"></div>
+                </div>
+
+                <div id="chatSelectedUser" class="selected-user">
+                    <strong id="chatSelectedName">-</strong>
+                    <span id="chatSelectedRole">-</span>
+                </div>
+
+                <div style="margin-top:18px;">
+                    <button class="button" id="openChatBtn" type="button" disabled>Open Chat</button>
+                    <a class="button" href="./chat.html" style="margin-left:10px; text-decoration:none;">View All Conversations</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./app.js"></script>
+    <script>
+        const API = 'http://localhost:5000';
+        let selectedUserId = null;
+        let searchTimer = null;
+
+        const PERM_LABELS = {
+            manage_applications: 'Seller Applications',
+            manage_products: 'Product Approvals',
+            manage_orders: 'Payment Confirmations',
+            manage_withdrawals: 'Withdrawals',
+            manage_shipping: 'Shipping Options',
+            manage_reviews: 'Review Moderation',
+            manage_reports: 'Seller Reports',
+            view_analytics: 'Analytics'
+        };
+
+        function setMessage(el, text, type) {
+            el.textContent = text;
+            el.className = `message ${type}`;
+        }
+
+        async function init() {
+            const user = getStoredUser();
+            const token = getStoredToken();
+
+            if (!user || !token || user.role !== 'admin') {
+                window.location.href = './login.html';
+                return;
+            }
+
+            if (user.adminLevel !== 1) {
+                window.location.href = './admin-dashboard.html';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/api/super-admin/admins`, { headers: authHeaders() });
+                if (res.status === 403) {
+                    window.location.href = './admin-dashboard.html';
+                    return;
+                }
+                if (!res.ok) throw new Error('Could not load admin team');
+                const admins = await res.json();
+                renderAdminList(admins);
+            } catch (err) {
+                document.getElementById('adminList').innerHTML =
+                    `<div class="admin-card"><span class="small">Could not load admin team: ${err.message}</span></div>`;
+            }
+
+            document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+            setupSearch();
+        }
+
+        function renderAdminList(admins) {
+            const list = document.getElementById('adminList');
+
+            if (!admins.length) {
+                list.innerHTML = '<div class="admin-card"><span class="small">No admins found.</span></div>';
+                return;
+            }
+
+            list.innerHTML = admins.map(admin => {
+                const isSuper = admin.admin_level === 1;
+                const perms = isSuper ? null : Object.entries(PERM_LABELS)
+                    .filter(([key]) => admin[key] === 1)
+                    .map(([, label]) => label);
+
+                return `
+                <div class="admin-card ${isSuper ? 'super' : ''}">
+                    <div class="admin-head">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div class="admin-avatar">${admin.fullname.charAt(0).toUpperCase()}</div>
+                            <div class="admin-info">
+                                <strong>${escHtml(admin.fullname)} ${isSuper ? '👑' : ''}</strong>
+                                <span>${escHtml(admin.email)}</span>
+                            </div>
+                        </div>
+                        <span class="badge ${isSuper ? 'super' : 'sub'}">${isSuper ? 'Super Admin' : 'Sub Admin'}</span>
+                    </div>
+
+                    ${!isSuper ? `
+                        <div style="margin-top:14px;">
+                            <div class="small" style="margin-bottom:8px; font-weight:700;">Permissions</div>
+                            <div class="perm-grid" id="permGrid-${admin.user_id}">
+                                ${Object.entries(PERM_LABELS).map(([key, label]) => `
+                                    <label class="perm-item">
+                                        <input type="checkbox" value="${key}" ${admin[key] === 1 ? 'checked' : ''}>
+                                        ${label}
+                                    </label>
+                                `).join('')}
+                            </div>
+                            <div class="admin-actions">
+                                <button class="button success" type="button"
+                                    onclick="savePermissions(${admin.user_id})">Save Permissions</button>
+                                <button class="button danger" type="button"
+                                    onclick="demoteAdmin(${admin.user_id}, '${escHtml(admin.fullname)}')">Demote</button>
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="small" style="margin-top:10px;">
+                            Full access to all features including promo settings. This is you.
+                        </div>
+                    `}
+                </div>
+                `;
+            }).join('');
+        }
+
+        async function savePermissions(adminId) {
+            const grid = document.getElementById(`permGrid-${adminId}`);
+            const checked = [...grid.querySelectorAll('input:checked')].map(i => i.value);
+
+            try {
+                const res = await fetch(`${API}/api/super-admin/permissions/${adminId}`, {
+                    method: 'PATCH',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ permissions: checked })
+                });
+                const data = await res.json();
+                setMessage(document.getElementById('topMessage'), data.message, res.ok ? 'success' : 'error');
+                if (res.ok) loadAdmins();
+            } catch {
+                setMessage(document.getElementById('topMessage'), 'Could not save permissions.', 'error');
+            }
+        }
+
+        async function demoteAdmin(adminId, name) {
+            if (!confirm(`Are you sure you want to demote ${name}? They will lose all admin access.`)) return;
+
+            try {
+                const res = await fetch(`${API}/api/super-admin/demote/${adminId}`, {
+                    method: 'DELETE',
+                    headers: authHeaders()
+                });
+                const data = await res.json();
+                setMessage(document.getElementById('topMessage'), data.message, res.ok ? 'success' : 'error');
+                if (res.ok) loadAdmins();
+            } catch {
+                setMessage(document.getElementById('topMessage'), 'Could not demote admin.', 'error');
+            }
+        }
+
+        async function loadAdmins() {
+            try {
+                const res = await fetch(`${API}/api/super-admin/admins`, { headers: authHeaders() });
+                const admins = await res.json();
+                renderAdminList(admins);
+            } catch {}
+        }
+
+        function setupSearch() {
+            const input = document.getElementById('userSearch');
+            const results = document.getElementById('searchResults');
+            const promoteBtn = document.getElementById('promoteBtn');
+
+            input.addEventListener('input', () => {
+                clearTimeout(searchTimer);
+                const q = input.value.trim();
+                if (q.length < 2) { results.classList.remove('open'); return; }
+                searchTimer = setTimeout(() => searchUsers(q), 300);
+            });
+
+            input.addEventListener('blur', () => {
+                setTimeout(() => results.classList.remove('open'), 200);
+            });
+
+            promoteBtn.addEventListener('click', promoteUser);
+
+            // Chat search
+            const chatInput = document.getElementById('chatSearch');
+            const chatResults = document.getElementById('chatSearchResults');
+            let chatTimer = null;
+
+            chatInput.addEventListener('input', () => {
+                clearTimeout(chatTimer);
+                const q = chatInput.value.trim();
+                if (q.length < 2) { chatResults.classList.remove('open'); return; }
+                chatTimer = setTimeout(() => searchTeam(q), 300);
+            });
+
+            chatInput.addEventListener('blur', () => {
+                setTimeout(() => chatResults.classList.remove('open'), 200);
+            });
+
+            document.getElementById('openChatBtn').addEventListener('click', () => {
+                if (!selectedChatUserId) return;
+                window.location.href = `./chat.html?with=${selectedChatUserId}`;
+            });
+        }
+
+        async function searchTeam(q) {
+            const results = document.getElementById('chatSearchResults');
+            try {
+                const res = await fetch(`${API}/api/super-admin/search-team?q=${encodeURIComponent(q)}`, {
+                    headers: authHeaders()
+                });
+                const users = await res.json();
+                if (!users.length) {
+                    results.innerHTML = '<div class="search-result-item"><span>No sub-admins or sellers found</span></div>';
+                } else {
+                    results.innerHTML = users.map(u => `
+                        <div class="search-result-item" onclick="selectChatUser(${u.user_id}, '${escHtml(u.fullname)}', '${escHtml(u.role === 'admin' ? 'Sub-Admin' : 'Seller')}')">
+                            <strong>${escHtml(u.fullname)}</strong>
+                            <span>${escHtml(u.email)} · ${u.role === 'admin' ? 'Sub-Admin' : 'Seller'}</span>
+                        </div>
+                    `).join('');
+                }
+                results.classList.add('open');
+            } catch {
+                results.classList.remove('open');
+            }
+        }
+
+        let selectedChatUserId = null;
+
+        function selectChatUser(userId, name, role) {
+            selectedChatUserId = userId;
+            document.getElementById('chatSearch').value = name;
+            document.getElementById('chatSelectedName').textContent = name;
+            document.getElementById('chatSelectedRole').textContent = role;
+            document.getElementById('chatSelectedUser').classList.add('visible');
+            document.getElementById('chatSearchResults').classList.remove('open');
+            document.getElementById('openChatBtn').disabled = false;
+        }
+
+        window.selectChatUser = selectChatUser;
+
+        async function searchUsers(q) {
+            const results = document.getElementById('searchResults');
+            try {
+                const res = await fetch(`${API}/api/super-admin/search-users?q=${encodeURIComponent(q)}`, {
+                    headers: authHeaders()
+                });
+                const users = await res.json();
+
+                if (!users.length) {
+                    results.innerHTML = '<div class="search-result-item"><span>No users found</span></div>';
+                } else {
+                    results.innerHTML = users.map(u => `
+                        <div class="search-result-item" onclick="selectUser(${u.user_id}, '${escHtml(u.fullname)}', '${escHtml(u.email)}')">
+                            <strong>${escHtml(u.fullname)}</strong>
+                            <span>${escHtml(u.email)} · ${u.role}</span>
+                        </div>
+                    `).join('');
+                }
+                results.classList.add('open');
+            } catch {
+                results.classList.remove('open');
+            }
+        }
+
+        function selectUser(userId, name, email) {
+            selectedUserId = userId;
+            document.getElementById('userSearch').value = name;
+            document.getElementById('selectedName').textContent = name;
+            document.getElementById('selectedEmail').textContent = email;
+            document.getElementById('selectedUser').classList.add('visible');
+            document.getElementById('searchResults').classList.remove('open');
+            document.getElementById('promoteBtn').disabled = false;
+        }
+
+        async function promoteUser() {
+            if (!selectedUserId) return;
+
+            const permissions = [...document.querySelectorAll('#promotePermGrid input:checked')]
+                .map(i => i.value);
+
+            const promoteBtn = document.getElementById('promoteBtn');
+            const promoteMessage = document.getElementById('promoteMessage');
+
+            promoteBtn.disabled = true;
+            promoteBtn.textContent = 'Promoting...';
+
+            try {
+                const res = await fetch(`${API}/api/super-admin/promote`, {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ user_id: selectedUserId, permissions })
+                });
+                const data = await res.json();
+                setMessage(promoteMessage, data.message, res.ok ? 'success' : 'error');
+
+                if (res.ok) {
+                    selectedUserId = null;
+                    document.getElementById('userSearch').value = '';
+                    document.getElementById('selectedUser').classList.remove('visible');
+                    document.querySelectorAll('#promotePermGrid input').forEach(i => i.checked = false);
+                    promoteBtn.disabled = true;
+                    loadAdmins();
+                }
+            } catch {
+                setMessage(promoteMessage, 'Could not promote user.', 'error');
+            } finally {
+                promoteBtn.disabled = false;
+                promoteBtn.textContent = 'Promote to Sub-Admin';
+            }
+        }
+
+        function escHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        window.savePermissions = savePermissions;
+        window.demoteAdmin = demoteAdmin;
+        window.selectUser = selectUser;
+
+        async function loadBankDetails() {
+            try {
+                const res = await fetch(`${API}/api/platform-settings`);
+                const data = await res.json();
+                document.getElementById('bankName').value = data.bank_name || '';
+                document.getElementById('bankAccountName').value = data.bank_account_name || '';
+                document.getElementById('bankAccountNumber').value = data.bank_account_number || '';
+                document.getElementById('bankInstructions').value = data.bank_instructions || '';
+                document.getElementById('withdrawalHoldHours').value = data.withdrawal_hold_hours ?? '24';
+                document.getElementById('minWithdrawalAmount').value = data.min_withdrawal_amount ?? '1000';
+            } catch {}
+        }
+
+        document.getElementById('bankForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('bankSaveBtn');
+            const msg = document.getElementById('bankMessage');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+            try {
+                const res = await fetch(`${API}/api/platform-settings`, {
+                    method: 'PUT',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        bank_name: document.getElementById('bankName').value.trim(),
+                        bank_account_name: document.getElementById('bankAccountName').value.trim(),
+                        bank_account_number: document.getElementById('bankAccountNumber').value.trim(),
+                        bank_instructions: document.getElementById('bankInstructions').value.trim(),
+                        withdrawal_hold_hours: document.getElementById('withdrawalHoldHours').value,
+                        min_withdrawal_amount: document.getElementById('minWithdrawalAmount').value
+                    })
+                });
+                const data = await res.json();
+                setMessage(msg, data.message, res.ok ? 'success' : 'error');
+            } catch {
+                setMessage(msg, 'Could not save settings.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Bank Details';
+            }
+        });
+
+        init();
+        loadBankDetails();
+    </script>
+</body>
+</html>

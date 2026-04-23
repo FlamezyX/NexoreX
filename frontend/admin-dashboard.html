@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | NexoreX</title>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #eef3f8 0%, #f7efe3 48%, #e8efe8 100%);
+            --panel: rgba(255, 255, 255, 0.92);
+            --panel-soft: rgba(255, 255, 255, 0.76);
+            --text: #1f2933;
+            --muted: #61707a;
+            --line: rgba(15, 23, 42, 0.1);
+            --brand: #1d4ed8;
+            --brand-deep: #1e3a8a;
+            --success: #166534;
+            --danger: #b42318;
+            --shadow: 0 24px 70px rgba(31, 41, 51, 0.12);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            font-family: "Trebuchet MS", Verdana, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top right, rgba(29, 78, 216, 0.14), transparent 30%),
+                radial-gradient(circle at bottom left, rgba(34, 197, 94, 0.12), transparent 28%),
+                var(--bg);
+            opacity: 0;
+            animation: fadeIn 0.45s ease forwards;
+        }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .shell {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 24px 0 42px;
+        }
+
+        .nav, .panel {
+            background: var(--panel);
+            border: 1px solid rgba(255, 255, 255, 0.84);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.5s ease both;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 18px;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .link, .button {
+            font: inherit;
+            text-decoration: none;
+            border-radius: 999px;
+            padding: 10px 16px;
+            transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .link { color: var(--text); }
+        .link:hover { background: rgba(31,41,51,0.06); }
+
+        .button {
+            border: 0;
+            cursor: pointer;
+            color: #fff;
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%);
+            box-shadow: 0 10px 24px rgba(29,78,216,0.16);
+        }
+        .button:hover { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(29,78,216,0.26); }
+        .button:active { transform: translateY(0); }
+
+        .hamburger {
+            display: none; flex-direction: column; gap: 5px;
+            background: none; border: none; cursor: pointer;
+            padding: 6px; border-radius: 10px; transition: background 0.2s ease;
+        }
+        .hamburger:hover { background: rgba(31,41,51,0.07); }
+        .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: transform 0.3s ease, opacity 0.3s ease; }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .hero, .grid {
+            display: grid;
+            gap: 22px;
+            margin-top: 22px;
+        }
+
+        .hero { grid-template-columns: 1.05fr 0.95fr; }
+        .grid { grid-template-columns: 1fr; }
+
+        .panel { padding: 28px; }
+
+        .headline {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            line-height: 0.98;
+            margin: 0 0 16px;
+            max-width: 13ch;
+        }
+
+        .subcopy, .small {
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .stats {
+            display: grid;
+            gap: 14px;
+        }
+
+        .stat {
+            padding: 18px;
+            border-radius: 22px;
+            background: var(--panel-soft);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 1.6rem;
+            margin-bottom: 4px;
+        }
+
+        .message {
+            min-height: 24px;
+            margin-top: 12px;
+            font-size: 0.95rem;
+        }
+
+        .message.error { color: var(--danger); }
+        .message.success { color: var(--success); }
+
+        .applications, .products, .shipping-list {
+            display: grid;
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .application-card, .product-card, .shipping-card {
+            padding: 18px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+        }
+
+        .application-head, .application-meta, .card-actions, .product-head, .product-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 6px 12px;
+            background: rgba(29, 78, 216, 0.1);
+            color: var(--brand);
+            font-weight: 700;
+            font-size: 0.86rem;
+        }
+
+        textarea, input, select {
+            width: 100%;
+            margin-top: 12px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 12px 14px;
+            font: inherit;
+            background: #fff;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .shipping-form {
+            display: grid;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.46);
+            z-index: 30;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-card {
+            width: min(840px, 100%);
+            max-height: 86vh;
+            overflow: auto;
+            padding: 24px;
+            border-radius: 28px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+        }
+
+        @media (max-width: 980px) {
+            .hero { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 720px) {
+            .nav { flex-wrap: wrap; }
+            .nav-actions {
+                display: none; width: 100%; flex-direction: column;
+                align-items: stretch; gap: 4px;
+                padding-top: 8px; border-top: 1px solid rgba(15,23,42,0.08);
+            }
+            .nav-actions.open { display: flex; }
+            .nav-actions a, .nav-actions button { text-align: left; border-radius: 14px; padding: 12px 14px; }
+            .hamburger { display: flex; }
+            .panel { padding: 22px; border-radius: 24px; }
+        }
+
+        @media (max-width: 480px) {
+            .shell { width: calc(100% - 24px); }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <nav class="nav">
+            <div>
+                <strong style="display:block; font-size:1.3rem; letter-spacing:0.05em; text-transform:uppercase;">NexoreX</strong>
+                <span id="navGreeting" class="small">Admin control center</span>
+            </div>
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu" type="button">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-actions" id="navActions">
+                <a class="link" href="./index.html">Home Feed</a>
+                <a class="link" href="./buyer-dashboard.html">Buyer Dashboard</a>
+                <a class="link" href="./chat.html">💬 Messages</a>
+                <a class="link" href="./super-admin.html">Admin Team</a>
+                <button class="button" id="logoutBtn" type="button">Logout</button>
+            </div>
+        </nav>
+
+        <section class="hero">
+            <article class="panel">
+                <h1 class="headline">Review sellers and products before they reach the marketplace.</h1>
+                <p class="subcopy">This admin dashboard now covers both seller approval and product approval so you can control who sells and what gets published on the home feed.</p>
+                <div id="topMessage" class="message" aria-live="polite"></div>
+            </article>
+            <aside class="panel">
+                <div class="stats">
+                    <div class="stat">
+                        <strong id="statsName">-</strong>
+                        <span>Logged in admin</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="statsPending">0</strong>
+                        <span>Pending seller applications</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="statsReviewed">0</strong>
+                        <span>Reviewed seller applications</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="statsProductsPending">0</strong>
+                        <span>Pending product approvals</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="statsPaymentsPending">0</strong>
+                        <span>Orders awaiting payment confirmation</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="statsPaidVerificationPending">0</strong>
+                        <span>Paid applications awaiting verification</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="statsPromoPending">0</strong>
+                        <span>Promo applications awaiting review</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="statsWithdrawalsPending">0</strong>
+                        <span>Pending withdrawal requests</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="statsReportsPending">0</strong>
+                        <span>Pending seller reports</span>
+                    </div>
+                </div>
+            </aside>
+        </section>
+
+        <section class="grid">
+            <article class="panel">
+                <h2 style="margin:0;">Seller Applications</h2>
+                <p class="small">Approve trusted sellers to unlock product uploads. Reject when details are incomplete or unsuitable.</p>
+                <div id="applications" class="applications"></div>
+            </article>
+
+            <article class="panel">
+                <h2 style="margin:0;">Product Approvals</h2>
+                <p class="small">Only approved products should reach the public home feed. Review new seller submissions here.</p>
+                <div id="products" class="products"></div>
+            </article>
+
+            <article class="panel">
+                <h2 style="margin:0;">Payment Confirmations</h2>
+                <p class="small">Confirm buyer payments here so seller wallets are credited and platform earnings are recorded.</p>
+                <div id="orders" class="products"></div>
+            </article>
+
+            <article class="panel">
+                <h2 style="margin:0;">Shipping Management</h2>
+                <p class="small">Create and update delivery options here so checkout stays aligned with your actual shipping methods.</p>
+
+                <form id="shippingForm" class="shipping-form">
+                    <input id="shippingName" type="text" placeholder="Shipping name" maxlength="100" required>
+                    <input id="shippingDescription" type="text" placeholder="Short description" maxlength="255">
+                    <input id="shippingDeliveryTime" type="text" placeholder="Delivery time e.g. 2-4 business days" maxlength="50" required>
+                    <input id="shippingPrice" type="number" min="0" step="0.01" placeholder="Price" required>
+                    <select id="shippingStatus">
+                        <option value="1">Active</option>
+                        <option value="0">Inactive</option>
+                    </select>
+                    <button class="button" id="shippingSubmitBtn" type="submit">Create Shipping Option</button>
+                </form>
+
+                <div id="shippingMessage" class="message" aria-live="polite"></div>
+                <div id="shippingOptions" class="shipping-list"></div>
+            </article>
+
+            <article class="panel">
+                <h2 style="margin:0;">Seller Reports</h2>
+                <p class="small">Review buyer reports against sellers. Take action where necessary — warn, suspend, or revoke seller approval.</p>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+                    <button class="button" type="button" onclick="loadReports('pending')">Pending</button>
+                    <button class="button" type="button" style="background:linear-gradient(135deg,#166534,#14532d);" onclick="loadReports('reviewed')">Reviewed</button>
+                    <button class="button" type="button" style="background:linear-gradient(135deg,#61707a,#374151);" onclick="loadReports('dismissed')">Dismissed</button>
+                    <button class="button" type="button" style="background:linear-gradient(135deg,#1d4ed8,#1e3a8a);" onclick="loadReports()">All</button>
+                </div>
+                <div id="reportsEl" class="products"></div>
+            </article>
+
+            <article class="panel">
+                <h2 style="margin:0;">Withdrawal Requests</h2>
+                <p class="small">Review seller withdrawal requests here. Rejecting returns funds to the seller wallet, while paid finalizes the payout.</p>
+                <div id="withdrawals" class="products"></div>
+            </article>
+
+            <article class="panel">
+                <h2 style="margin:0;">Analytics</h2>
+                <p class="small">Track marketplace growth, revenue, seller balances, and order movement from here.</p>
+                <div id="analyticsSummary" class="applications"></div>
+                <div id="analyticsTrend" class="products"></div>
+            </article>
+
+            <article class="panel">
+                <h2 style="margin:0;">Review Moderation</h2>
+                <p class="small">Hide or flag abusive reviews, and restore legitimate feedback when needed.</p>
+                <div id="reviews" class="products"></div>
+            </article>
+
+            <article class="panel">
+                <h2 style="margin:0;">Promo Settings</h2>
+                <p class="small">Turn the free-store promo on or off and set the live promo questions sellers should answer when it is active.</p>
+                <form id="promoForm" class="shipping-form">
+                    <select id="promoIsActive">
+                        <option value="0">Promo Unavailable</option>
+                        <option value="1">Promo Available</option>
+                    </select>
+                    <input id="promoTitle" type="text" maxlength="150" placeholder="Promo title" required>
+                    <textarea id="promoDescription" placeholder="Promo description for sellers"></textarea>
+                    <textarea id="promoQuestion1" placeholder="Promo question 1"></textarea>
+                    <textarea id="promoQuestion2" placeholder="Promo question 2"></textarea>
+                    <textarea id="promoQuestion3" placeholder="Promo question 3"></textarea>
+                    <button class="button" id="promoSubmitBtn" type="submit">Save Promo Settings</button>
+                </form>
+                <div id="promoMessage" class="message" aria-live="polite"></div>
+                <div id="promoLogs" class="products" style="margin-top:18px;"></div>
+            </article>
+        </section>
+    </main>
+
+    <div id="applicationModal" class="modal">
+        <div class="modal-card">
+            <div class="product-head">
+                <div>
+                    <h2 id="applicationModalTitle" style="margin:0;">Seller application details</h2>
+                    <div id="applicationModalSubtitle" class="small" style="margin-top:8px;">Loading application details...</div>
+                </div>
+                <button class="button" id="closeApplicationModalBtn" type="button">Close</button>
+            </div>
+            <div id="applicationModalBody" class="applications"></div>
+        </div>
+    </div>
+
+    <script src="./app.js"></script>
+    <script>
+        const navGreeting = document.getElementById('navGreeting');
+        const statsName = document.getElementById('statsName');
+        const statsPending = document.getElementById('statsPending');
+        const statsReviewed = document.getElementById('statsReviewed');
+        const statsProductsPending = document.getElementById('statsProductsPending');
+        const statsPaymentsPending = document.getElementById('statsPaymentsPending');
+        const statsPaidVerificationPending = document.getElementById('statsPaidVerificationPending');
+        const statsPromoPending = document.getElementById('statsPromoPending');
+        const statsWithdrawalsPending = document.getElementById('statsWithdrawalsPending');
+        const topMessage = document.getElementById('topMessage');
+        const applicationsEl = document.getElementById('applications');
+        const productsEl = document.getElementById('products');
+        const ordersEl = document.getElementById('orders');
+        const withdrawalsEl = document.getElementById('withdrawals');
+        const shippingForm = document.getElementById('shippingForm');
+        const shippingOptionsEl = document.getElementById('shippingOptions');
+        const shippingMessage = document.getElementById('shippingMessage');
+        const shippingSubmitBtn = document.getElementById('shippingSubmitBtn');
+        const analyticsSummaryEl = document.getElementById('analyticsSummary');
+        const analyticsTrendEl = document.getElementById('analyticsTrend');
+        const reviewsEl = document.getElementById('reviews');
+        const promoForm = document.getElementById('promoForm');
+        const promoMessage = document.getElementById('promoMessage');
+        const promoSubmitBtn = document.getElementById('promoSubmitBtn');
+        const promoLogsEl = document.getElementById('promoLogs');
+        const applicationModal = document.getElementById('applicationModal');
+        const applicationModalTitle = document.getElementById('applicationModalTitle');
+        const applicationModalSubtitle = document.getElementById('applicationModalSubtitle');
+        const applicationModalBody = document.getElementById('applicationModalBody');
+        let loadedApplications = [];
+
+        function ensureAdmin() {
+            const user = getStoredUser();
+            const token = getStoredToken();
+
+            if (!user || !token) {
+                window.location.href = './login.html';
+                return null;
+            }
+
+            if (user.role !== 'admin') {
+                window.location.href = './buyer-dashboard.html';
+                return null;
+            }
+
+            navGreeting.textContent = `${user.name}'s admin dashboard`;
+            statsName.textContent = user.name || 'Admin';
+            return user;
+        }
+
+        function setMessage(target, text, type) {
+            target.textContent = text;
+            target.className = `message ${type}`;
+        }
+
+        function formatDate(value) {
+            return formatDateTime(value);
+        }
+
+        function toProofUrl(value) {
+            if (!value) {
+                return '';
+            }
+
+            return value.startsWith('http') ? value : `http://localhost:5000${value}`;
+        }
+
+        function parsePromoAnswers(rawValue) {
+            try {
+                const answers = JSON.parse(rawValue || '[]');
+                return Array.isArray(answers) ? answers : [];
+            } catch (error) {
+                return rawValue ? [rawValue] : [];
+            }
+        }
+
+        function openApplicationModal(applicationId) {
+            const app = loadedApplications.find((item) => Number(item.application_id) === Number(applicationId));
+
+            if (!app) {
+                return;
+            }
+
+            const promoAnswers = parsePromoAnswers(app.promo_answers);
+            applicationModalTitle.textContent = `${app.business_name} application`;
+            applicationModalSubtitle.textContent = `${app.fullname} | ${app.email} | Submitted ${formatDate(app.submitted_at)}`;
+            applicationModalBody.innerHTML = `
+                <div class="application-card">
+                    <div class="application-meta">
+                        <span class="small">Path: ${app.application_type || 'paid'}</span>
+                        <span class="small">Store fee: ${formatMoney(app.store_fee_amount || 3000)}</span>
+                        <span class="small">Payment status: ${app.payment_status || 'pending'}</span>
+                        <span class="small">Promo status: ${app.promo_status || 'not_applied'}</span>
+                    </div>
+                    <div class="application-meta" style="margin-top:10px;">
+                        <span class="small">Location: ${app.location || 'Not provided'}</span>
+                        <span class="small">Phone: ${app.phone || 'Not provided'}</span>
+                        <span class="small">Seller status: ${app.seller_status || 'pending'}</span>
+                    </div>
+                    <div class="small" style="margin-top:14px; white-space:pre-wrap;">${app.business_description || 'No business description provided.'}</div>
+                    <div class="small" style="margin-top:14px;">Payment reference: ${app.payment_reference || 'Not provided'}</div>
+                    <div class="small" style="margin-top:10px;">
+                        ${app.payment_proof_url ? `<a href="${toProofUrl(app.payment_proof_url)}" target="_blank" rel="noopener noreferrer">Open uploaded seller payment proof</a>` : 'No seller payment proof uploaded'}
+                    </div>
+                    <div class="small" style="margin-top:14px;">Admin note: ${app.admin_note || 'No admin note yet'}</div>
+                    <div style="margin-top:14px;">
+                        <strong>Promo answers</strong>
+                        <div class="small" style="white-space:pre-wrap; margin-top:8px;">${promoAnswers.length ? promoAnswers.map((answer, index) => `${index + 1}. ${answer}`).join('\n') : 'No promo answers submitted.'}</div>
+                    </div>
+                </div>
+            `;
+            applicationModal.classList.add('open');
+        }
+
+        function closeApplicationModal() {
+            applicationModal.classList.remove('open');
+        }
+
+        function renderApplications(applications) {
+            loadedApplications = applications;
+            const pendingCount = applications.filter((app) => app.status === 'pending').length;
+            const reviewedCount = applications.filter((app) => app.status !== 'pending').length;
+            const paidVerificationPendingCount = applications.filter((app) =>
+                app.status === 'pending' &&
+                app.application_type === 'paid' &&
+                app.payment_status === 'submitted'
+            ).length;
+            const promoPendingCount = applications.filter((app) =>
+                app.status === 'pending' &&
+                app.application_type === 'promo'
+            ).length;
+            statsPending.textContent = String(pendingCount);
+            statsReviewed.textContent = String(reviewedCount);
+            statsPaidVerificationPending.textContent = String(paidVerificationPendingCount);
+            statsPromoPending.textContent = String(promoPendingCount);
+
+            if (!applications.length) {
+                applicationsEl.innerHTML = `
+                    <div class="application-card">
+                        <strong>No seller applications yet.</strong>
+                        <div class="small">Once sellers submit their business details, they will appear here.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            applicationsEl.innerHTML = applications.map((app) => `
+                <div class="application-card">
+                    <div class="application-head">
+                        <div>
+                            <strong>${app.business_name}</strong>
+                            <div class="small">${app.fullname} | ${app.email}</div>
+                        </div>
+                        <span class="badge">${app.status}</span>
+                    </div>
+                    <div class="application-meta" style="margin-top:10px;">
+                        <span class="small">Submitted: ${formatDate(app.submitted_at)}</span>
+                        <span class="small">Location: ${app.location || 'Not provided'}</span>
+                        <span class="small">Phone: ${app.phone || 'Not provided'}</span>
+                    </div>
+                    <div class="application-meta" style="margin-top:10px;">
+                        <span class="small">Path: ${app.application_type || 'paid'}</span>
+                        <span class="small">Store fee: ${formatMoney(app.store_fee_amount || 3000)}</span>
+                        <span class="small">Payment status: ${app.payment_status || 'pending'}</span>
+                        <span class="small">Payment verified: ${app.payment_verified_at ? formatDate(app.payment_verified_at) : 'Not yet'}</span>
+                        <span class="small">Promo status: ${app.promo_status || 'not_applied'}</span>
+                    </div>
+                    <p class="small" style="margin:12px 0 0;">${app.business_description || 'No business description provided.'}</p>
+                    <p class="small" style="margin:8px 0 0;">Payment reference: ${app.payment_reference || 'Not provided'}</p>
+                    <p class="small" style="margin:8px 0 0;">Seller proof: ${app.payment_proof_url ? `<a href="${toProofUrl(app.payment_proof_url)}" target="_blank" rel="noopener noreferrer">Open uploaded proof</a>` : 'Not uploaded'}</p>
+                    <textarea id="note-${app.application_id}" placeholder="Admin note (optional)">${app.admin_note || ''}</textarea>
+                    <div class="card-actions" style="margin-top:12px;">
+                        <div class="small">Seller status on user account: ${app.seller_status}</div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button class="button" type="button" onclick="openApplicationModal(${app.application_id})">View Details</button>
+                            ${app.application_type === 'paid' ? `<button class="button" type="button" onclick="verifySellerPayment(${app.application_id}, 'verified')">Verify Payment</button>` : ''}
+                            ${app.application_type === 'paid' ? `<button class="button" type="button" style="background:linear-gradient(135deg, #b42318 0%, #7f1d1d 100%);" onclick="verifySellerPayment(${app.application_id}, 'rejected')">Reject Payment</button>` : ''}
+                            <button class="button" type="button" onclick="reviewApplication(${app.application_id}, 'approved')">Approve</button>
+                            <button class="button" type="button" style="background:linear-gradient(135deg, #b42318 0%, #7f1d1d 100%);" onclick="reviewApplication(${app.application_id}, 'rejected')">Reject</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderProducts(products) {
+            const pendingProducts = products.filter((product) => product.approval_status === 'pending').length;
+            statsProductsPending.textContent = String(pendingProducts);
+
+            if (!products.length) {
+                productsEl.innerHTML = `
+                    <div class="product-card">
+                        <strong>No products submitted yet.</strong>
+                        <div class="small">Once approved sellers submit products, they will appear here.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            productsEl.innerHTML = products.map((product) => `
+                <div class="product-card">
+                    <div class="product-head">
+                        <div>
+                            <strong>${product.product_name}</strong>
+                            <div class="small">${product.seller_name} | ${product.seller_email}</div>
+                        </div>
+                        <span class="badge">${product.approval_status}</span>
+                    </div>
+                    <div class="product-meta" style="margin-top:10px;">
+                        <span class="small">Submitted: ${formatDate(product.created_at)}</span>
+                        <span class="small">Price: ${formatMoney(product.price)}</span>
+                        <span class="small">Stock: ${product.stock_quantity}</span>
+                    </div>
+                    <p class="small" style="margin:12px 0 0;">${product.description}</p>
+                    <textarea id="product-note-${product.product_id}" placeholder="Admin note (optional)">${product.admin_note || ''}</textarea>
+                    <div class="card-actions" style="margin-top:12px;">
+                        <div class="small">Current product status: ${product.product_status}</div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button class="button" type="button" onclick="reviewProduct(${product.product_id}, 'approved')">Approve</button>
+                            <button class="button" type="button" style="background:linear-gradient(135deg, #b42318 0%, #7f1d1d 100%);" onclick="reviewProduct(${product.product_id}, 'rejected')">Reject</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderOrders(orders) {
+            const pendingOrders = orders.filter((order) => ['pending_payment', 'payment_uploaded'].includes(order.status)).length;
+            statsPaymentsPending.textContent = String(pendingOrders);
+
+            if (!orders.length) {
+                ordersEl.innerHTML = `
+                    <div class="product-card">
+                        <strong>No orders yet.</strong>
+                        <div class="small">Orders that need payment confirmation will appear here.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            ordersEl.innerHTML = orders.map((order) => `
+                <div class="product-card">
+                    <div class="product-head">
+                        <div>
+                            <strong>Order #${order.order_id}</strong>
+                            <div class="small">Buyer #${order.buyer_id} | Seller #${order.seller_id}</div>
+                        </div>
+                        <span class="badge">${order.status}</span>
+                    </div>
+                    <div class="product-meta" style="margin-top:10px;">
+                        <span class="small">Total: ${formatMoney(order.total_amount)}</span>
+                        <span class="small">Commission: ${formatMoney(order.commission_amount)}</span>
+                        <span class="small">Seller credit: ${formatMoney(order.seller_amount)}</span>
+                    </div>
+                    <p class="small" style="margin:12px 0 0;">Payment ref: ${order.payment_reference || 'Not provided yet'}</p>
+                    <p class="small" style="margin:6px 0 0;">Delivery: ${order.delivery_address || 'No delivery address'}</p>
+                    <div class="card-actions" style="margin-top:12px;">
+                        <div class="small">
+                            ${order.payment_proof_url ? `<a href="${toProofUrl(order.payment_proof_url)}" target="_blank" rel="noopener noreferrer">View uploaded proof</a>` : 'No proof uploaded yet'}
+                        </div>
+                        ${['pending_payment', 'payment_uploaded'].includes(order.status) ? `
+                            <button class="button" type="button" onclick="confirmPayment(${order.order_id})">Confirm Payment</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderShippingOptions(options) {
+            if (!options.length) {
+                shippingOptionsEl.innerHTML = `
+                    <div class="shipping-card">
+                        <strong>No shipping options yet.</strong>
+                        <div class="small">Create your first delivery method above.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            shippingOptionsEl.innerHTML = options.map((option) => `
+                <div class="shipping-card">
+                    <div class="product-head">
+                        <div>
+                            <strong>${option.name}</strong>
+                            <div class="small">${option.description || 'No description provided'}</div>
+                        </div>
+                        <span class="badge">${option.is_active ? 'active' : 'inactive'}</span>
+                    </div>
+                    <div class="product-meta" style="margin-top:10px;">
+                        <span class="small">Delivery time: ${option.delivery_time}</span>
+                        <span class="small">Price: ${formatMoney(option.price)}</span>
+                    </div>
+                    <div class="shipping-form">
+                        <input id="shipping-name-${option.shipping_option_id}" type="text" value="${option.name}">
+                        <input id="shipping-description-${option.shipping_option_id}" type="text" value="${option.description || ''}">
+                        <input id="shipping-time-${option.shipping_option_id}" type="text" value="${option.delivery_time}">
+                        <input id="shipping-price-${option.shipping_option_id}" type="number" min="0" step="0.01" value="${Number(option.price).toFixed(2)}">
+                        <select id="shipping-active-${option.shipping_option_id}">
+                            <option value="1" ${option.is_active ? 'selected' : ''}>Active</option>
+                            <option value="0" ${option.is_active ? '' : 'selected'}>Inactive</option>
+                        </select>
+                        <button class="button" type="button" onclick="updateShipping(${option.shipping_option_id})">Save Shipping Option</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderWithdrawals(withdrawals) {
+            const pendingCount = withdrawals.filter((item) => item.status === 'pending').length;
+            statsWithdrawalsPending.textContent = String(pendingCount);
+
+            if (!withdrawals.length) {
+                withdrawalsEl.innerHTML = `
+                    <div class="product-card">
+                        <strong>No withdrawal requests yet.</strong>
+                        <div class="small">Seller payout requests will appear here.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            withdrawalsEl.innerHTML = withdrawals.map((item) => `
+                <div class="product-card">
+                    <div class="product-head">
+                        <div>
+                            <strong>Withdrawal #${item.withdrawal_request_id}</strong>
+                            <div class="small">${item.fullname} | ${item.email}</div>
+                        </div>
+                        <span class="badge">${item.status}</span>
+                    </div>
+                    <div class="product-meta" style="margin-top:10px;">
+                        <span class="small">Amount: ${formatMoney(item.amount)}</span>
+                        <span class="small">Requested: ${formatDate(item.requested_at)}</span>
+                    </div>
+                    <p class="small" style="margin:12px 0 0;">${item.bank_name || 'No bank'} | ${item.account_name || 'No account name'} | ${item.account_number || 'No account number'}</p>
+                    <textarea id="withdrawal-note-${item.withdrawal_request_id}" placeholder="Admin note (optional)">${item.admin_note || ''}</textarea>
+                    <div class="card-actions" style="margin-top:12px;">
+                        <div class="small">Processed: ${item.processed_at ? formatDate(item.processed_at) : 'Not processed yet'}</div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            ${item.status !== 'paid' ? `<button class="button" type="button" onclick="reviewWithdrawal(${item.withdrawal_request_id}, 'approved')">Approve</button>` : ''}
+                            ${item.status !== 'paid' ? `<button class="button" type="button" onclick="reviewWithdrawal(${item.withdrawal_request_id}, 'rejected')" style="background:linear-gradient(135deg, #b42318 0%, #7f1d1d 100%);">Reject</button>` : ''}
+                            ${item.status !== 'paid' ? `<button class="button" type="button" onclick="reviewWithdrawal(${item.withdrawal_request_id}, 'paid')">Mark Paid</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAnalytics(data) {
+            const summary = data.summary || {};
+            const trend = data.order_trend || [];
+
+            analyticsSummaryEl.innerHTML = `
+                <div class="application-card"><strong>${summary.total_users || 0}</strong><div class="small">Total users</div></div>
+                <div class="application-card"><strong>${summary.total_sellers || 0}</strong><div class="small">Sellers</div></div>
+                <div class="application-card"><strong>${summary.total_buyers || 0}</strong><div class="small">Buyers</div></div>
+                <div class="application-card"><strong>${summary.approved_products || 0}</strong><div class="small">Approved products</div></div>
+                <div class="application-card"><strong>${summary.total_orders || 0}</strong><div class="small">Total orders</div></div>
+                <div class="application-card"><strong>${summary.delivered_orders || 0}</strong><div class="small">Delivered orders</div></div>
+                <div class="application-card"><strong>${formatMoney(summary.gross_revenue || 0)}</strong><div class="small">Gross revenue</div></div>
+                <div class="application-card"><strong>${formatMoney(summary.total_commission || 0)}</strong><div class="small">Platform commission</div></div>
+                <div class="application-card"><strong>${formatMoney(summary.paid_withdrawals || 0)}</strong><div class="small">Paid withdrawals</div></div>
+                <div class="application-card"><strong>${formatMoney(summary.seller_balances || 0)}</strong><div class="small">Seller balances</div></div>
+            `;
+
+            analyticsTrendEl.innerHTML = trend.length ? trend.map((item) => `
+                <div class="product-card">
+                    <div class="product-head">
+                        <strong>${item.day}</strong>
+                        <span class="badge">${item.orders_count} orders</span>
+                    </div>
+                    <div class="small" style="margin-top:10px;">Revenue: ${formatMoney(item.revenue)}</div>
+                </div>
+            `).join('') : `
+                <div class="product-card">
+                    <strong>No analytics trend data yet.</strong>
+                    <div class="small">Once orders are created, recent trend rows will appear here.</div>
+                </div>
+            `;
+        }
+
+        function renderReviewModeration(reviews) {
+            if (!reviews.length) {
+                reviewsEl.innerHTML = `
+                    <div class="product-card">
+                        <strong>No reviews yet.</strong>
+                        <div class="small">Buyer reviews will appear here when submitted.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            reviewsEl.innerHTML = reviews.map((review) => `
+                <div class="product-card">
+                    <div class="product-head">
+                        <div>
+                            <strong>${review.product_name}</strong>
+                            <div class="small">${review.buyer_name} -> ${review.seller_name}</div>
+                        </div>
+                        <span class="badge">${review.review_status}</span>
+                    </div>
+                    <div class="product-meta" style="margin-top:10px;">
+                        <span class="small">Rating: ${review.rating}/5</span>
+                        <span class="small">Created: ${formatDate(review.created_at)}</span>
+                        <span class="small">Order #${review.order_id}</span>
+                    </div>
+                    <p class="small" style="margin:12px 0 0;">${review.comment || 'No comment added.'}</p>
+                    <textarea id="review-note-${review.review_id}" placeholder="Admin note (optional)">${review.admin_note || ''}</textarea>
+                    <div class="card-actions" style="margin-top:12px;">
+                        <div class="small">Moderated: ${review.moderated_at ? formatDate(review.moderated_at) : 'Not moderated yet'}</div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button class="button" type="button" onclick="moderateReview(${review.review_id}, 'published')">Publish</button>
+                            <button class="button" type="button" onclick="moderateReview(${review.review_id}, 'flagged')">Flag</button>
+                            <button class="button" type="button" style="background:linear-gradient(135deg, #b42318 0%, #7f1d1d 100%);" onclick="moderateReview(${review.review_id}, 'hidden')">Hide</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPromoLogs(logs) {
+            if (!logs.length) {
+                promoLogsEl.innerHTML = `
+                    <div class="product-card">
+                        <strong>No promo history yet.</strong>
+                        <div class="small">Promo activation and question changes will appear here.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            promoLogsEl.innerHTML = logs.map((log) => `
+                <div class="product-card">
+                    <div class="product-head">
+                        <div>
+                            <strong>${log.title_snapshot || 'Free Store Promo'}</strong>
+                            <div class="small">${log.admin_name || 'Admin'} | ${formatDate(log.created_at)}</div>
+                        </div>
+                        <span class="badge">${log.action_type}</span>
+                    </div>
+                    <p class="small" style="margin:12px 0 0;">${log.description_snapshot || 'No promo description saved.'}</p>
+                    <div class="small" style="white-space:pre-wrap; margin-top:8px;">${(() => {
+                        try {
+                            const questions = JSON.parse(log.questions_snapshot || '[]');
+                            return Array.isArray(questions) && questions.length
+                                ? questions.map((question, index) => `${index + 1}. ${question}`).join('\n')
+                                : 'No promo questions saved.';
+                        } catch (error) {
+                            return log.questions_snapshot || 'No promo questions saved.';
+                        }
+                    })()}</div>
+                </div>
+            `).join('');
+        }
+
+        async function loadApplications() {
+            const user = getStoredUser();
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/applications', {
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not load seller applications');
+                }
+                renderApplications(data);
+            } catch (error) {
+                applicationsEl.innerHTML = `
+                    <div class="application-card">
+                        <strong>Could not load applications.</strong>
+                        <div class="small">${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadProducts() {
+            const user = getStoredUser();
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/products', {
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not load products');
+                }
+                renderProducts(data);
+            } catch (error) {
+                productsEl.innerHTML = `
+                    <div class="product-card">
+                        <strong>Could not load products.</strong>
+                        <div class="small">${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await fetch('http://localhost:5000/api/orders/my', {
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not load orders');
+                }
+                renderOrders(data);
+            } catch (error) {
+                ordersEl.innerHTML = `
+                    <div class="product-card">
+                        <strong>Could not load orders.</strong>
+                        <div class="small">${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadShippingOptions() {
+            try {
+                const response = await fetch('http://localhost:5000/api/shipping-options/admin', {
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not load shipping options');
+                }
+
+                renderShippingOptions(data);
+            } catch (error) {
+                shippingOptionsEl.innerHTML = `
+                    <div class="shipping-card">
+                        <strong>Could not load shipping options.</strong>
+                        <div class="small">${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadWithdrawals() {
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/withdrawals', {
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not load withdrawals');
+                }
+
+                renderWithdrawals(data);
+            } catch (error) {
+                withdrawalsEl.innerHTML = `
+                    <div class="product-card">
+                        <strong>Could not load withdrawals.</strong>
+                        <div class="small">${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/analytics', {
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not load analytics');
+                }
+
+                renderAnalytics(data);
+            } catch (error) {
+                analyticsSummaryEl.innerHTML = `
+                    <div class="application-card">
+                        <strong>Could not load analytics.</strong>
+                        <div class="small">${error.message}</div>
+                    </div>
+                `;
+                analyticsTrendEl.innerHTML = '';
+            }
+        }
+
+        async function loadReviews() {
+            try {
+                const response = await fetch('http://localhost:5000/api/reviews/moderation', {
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not load reviews');
+                }
+
+                renderReviewModeration(data);
+            } catch (error) {
+                reviewsEl.innerHTML = `
+                    <div class="product-card">
+                        <strong>Could not load reviews.</strong>
+                        <div class="small">${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadPromoSettings() {
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/promo-settings', {
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not load promo settings');
+                }
+
+                document.getElementById('promoIsActive').value = String(Number(data.is_active) === 1 ? 1 : 0);
+                document.getElementById('promoTitle').value = data.promo_title || 'Free Store Promo';
+                document.getElementById('promoDescription').value = data.promo_description || '';
+                document.getElementById('promoQuestion1').value = data.promo_questions?.[0] || '';
+                document.getElementById('promoQuestion2').value = data.promo_questions?.[1] || '';
+                document.getElementById('promoQuestion3').value = data.promo_questions?.[2] || '';
+            } catch (error) {
+                setMessage(promoMessage, error.message, 'error');
+            }
+        }
+
+        async function loadPromoLogs() {
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/promo-logs', {
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not load promo history');
+                }
+
+                renderPromoLogs(data);
+            } catch (error) {
+                promoLogsEl.innerHTML = `
+                    <div class="product-card">
+                        <strong>Could not load promo history.</strong>
+                        <div class="small">${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        async function reviewApplication(applicationId, status) {
+            const user = getStoredUser();
+            const note = document.getElementById(`note-${applicationId}`)?.value || '';
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/admin/applications/${applicationId}`, {
+                    method: 'PATCH',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        status,
+                        admin_note: note
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not review application');
+                }
+                setMessage(topMessage, data.message, 'success');
+                loadApplications();
+            } catch (error) {
+                setMessage(topMessage, error.message, 'error');
+            }
+        }
+
+        async function verifySellerPayment(applicationId, status) {
+            const note = document.getElementById(`note-${applicationId}`)?.value || '';
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/admin/applications/${applicationId}/payment`, {
+                    method: 'PATCH',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        status,
+                        admin_note: note
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not verify seller payment');
+                }
+                setMessage(topMessage, data.message, 'success');
+                loadApplications();
+            } catch (error) {
+                setMessage(topMessage, error.message, 'error');
+            }
+        }
+
+        async function reviewProduct(productId, status) {
+            const user = getStoredUser();
+            const note = document.getElementById(`product-note-${productId}`)?.value || '';
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/admin/products/${productId}`, {
+                    method: 'PATCH',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        status,
+                        admin_note: note
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not review product');
+                }
+                setMessage(topMessage, data.message, 'success');
+                loadProducts();
+            } catch (error) {
+                setMessage(topMessage, error.message, 'error');
+            }
+        }
+
+        async function confirmPayment(orderId) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/orders/${orderId}/confirm-payment`, {
+                    method: 'PATCH',
+                    headers: authHeaders()
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not confirm payment');
+                }
+                setMessage(topMessage, data.message, 'success');
+                loadOrders();
+            } catch (error) {
+                setMessage(topMessage, error.message, 'error');
+            }
+        }
+
+        async function createShippingOption(event) {
+            event.preventDefault();
+
+            shippingSubmitBtn.disabled = true;
+            shippingSubmitBtn.textContent = 'Saving...';
+
+            try {
+                const response = await fetch('http://localhost:5000/api/shipping-options', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        name: document.getElementById('shippingName').value.trim(),
+                        description: document.getElementById('shippingDescription').value.trim(),
+                        delivery_time: document.getElementById('shippingDeliveryTime').value.trim(),
+                        price: document.getElementById('shippingPrice').value,
+                        is_active: Number(document.getElementById('shippingStatus').value)
+                    })
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not create shipping option');
+                }
+
+                setMessage(shippingMessage, data.message, 'success');
+                shippingForm.reset();
+                document.getElementById('shippingStatus').value = '1';
+                loadShippingOptions();
+            } catch (error) {
+                setMessage(shippingMessage, error.message, 'error');
+            } finally {
+                shippingSubmitBtn.disabled = false;
+                shippingSubmitBtn.textContent = 'Create Shipping Option';
+            }
+        }
+
+        async function updateShipping(optionId) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/shipping-options/${optionId}`, {
+                    method: 'PATCH',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        name: document.getElementById(`shipping-name-${optionId}`).value.trim(),
+                        description: document.getElementById(`shipping-description-${optionId}`).value.trim(),
+                        delivery_time: document.getElementById(`shipping-time-${optionId}`).value.trim(),
+                        price: document.getElementById(`shipping-price-${optionId}`).value,
+                        is_active: Number(document.getElementById(`shipping-active-${optionId}`).value)
+                    })
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not update shipping option');
+                }
+
+                setMessage(shippingMessage, data.message, 'success');
+                loadShippingOptions();
+            } catch (error) {
+                setMessage(shippingMessage, error.message, 'error');
+            }
+        }
+
+        async function reviewWithdrawal(requestId, status) {
+            const note = document.getElementById(`withdrawal-note-${requestId}`)?.value || '';
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/admin/withdrawals/${requestId}`, {
+                    method: 'PATCH',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        status,
+                        admin_note: note
+                    })
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not review withdrawal');
+                }
+
+                setMessage(topMessage, data.message, 'success');
+                loadWithdrawals();
+            } catch (error) {
+                setMessage(topMessage, error.message, 'error');
+            }
+        }
+
+        async function moderateReview(reviewId, status) {
+            const note = document.getElementById(`review-note-${reviewId}`)?.value || '';
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/reviews/${reviewId}`, {
+                    method: 'PATCH',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        status,
+                        admin_note: note
+                    })
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not moderate review');
+                }
+
+                setMessage(topMessage, data.message, 'success');
+                loadReviews();
+            } catch (error) {
+                setMessage(topMessage, error.message, 'error');
+            }
+        }
+
+        async function savePromoSettings(event) {
+            event.preventDefault();
+            promoSubmitBtn.disabled = true;
+            promoSubmitBtn.textContent = 'Saving...';
+
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/promo-settings', {
+                    method: 'PUT',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        is_active: Number(document.getElementById('promoIsActive').value),
+                        promo_title: document.getElementById('promoTitle').value.trim(),
+                        promo_description: document.getElementById('promoDescription').value.trim(),
+                        promo_questions: [
+                            document.getElementById('promoQuestion1').value.trim(),
+                            document.getElementById('promoQuestion2').value.trim(),
+                            document.getElementById('promoQuestion3').value.trim()
+                        ].filter(Boolean)
+                    })
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not save promo settings');
+                }
+
+                setMessage(promoMessage, data.message, 'success');
+                loadPromoSettings();
+            } catch (error) {
+                setMessage(promoMessage, error.message, 'error');
+            } finally {
+                promoSubmitBtn.disabled = false;
+                promoSubmitBtn.textContent = 'Save Promo Settings';
+            }
+        }
+
+        const reasonLabels = {
+            fake_listing: 'Fake / Misleading Listing',
+            item_not_as_described: 'Item Not As Described',
+            rude_behaviour: 'Rude / Unprofessional Behaviour',
+            suspected_scam: 'Suspected Scam / Fraud',
+            other: 'Other'
+        };
+
+        function renderReports(reports) {
+            const reportsEl = document.getElementById('reportsEl');
+            const pendingCount = reports.filter(r => r.status === 'pending').length;
+            document.getElementById('statsReportsPending').textContent = String(pendingCount);
+
+            if (!reports.length) {
+                reportsEl.innerHTML = `
+                    <div class="product-card">
+                        <strong>No reports found.</strong>
+                        <div class="small">Buyer reports against sellers will appear here.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            reportsEl.innerHTML = reports.map((report) => `
+                <div class="product-card">
+                    <div class="product-head">
+                        <div>
+                            <strong>${reasonLabels[report.reason] || report.reason}</strong>
+                            <div class="small">${report.buyer_name} reported ${report.seller_name}</div>
+                        </div>
+                        <span class="badge">${report.status}</span>
+                    </div>
+                    <div class="product-meta" style="margin-top:10px;">
+                        <span class="small">Buyer: ${report.buyer_email}</span>
+                        <span class="small">Seller: ${report.seller_email}</span>
+                        <span class="small">Seller status: ${report.seller_status}</span>
+                        <span class="small">Total reports on seller: ${report.seller_total_reports}</span>
+                        <span class="small">Submitted: ${formatDate(report.created_at)}</span>
+                    </div>
+                    <p class="small" style="margin:12px 0 0; white-space:pre-wrap;">${report.description}</p>
+                    <textarea id="report-note-${report.report_id}" placeholder="Admin note (optional)">${report.admin_note || ''}</textarea>
+                    <div class="card-actions" style="margin-top:12px;">
+                        <div class="small">Reviewed: ${report.reviewed_at ? formatDate(report.reviewed_at) : 'Not reviewed yet'}</div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            ${report.status === 'pending' ? `
+                                <button class="button" type="button"
+                                    style="background:linear-gradient(135deg,#166534,#14532d);"
+                                    onclick="reviewReport(${report.report_id}, 'reviewed')">Mark Reviewed</button>
+                                <button class="button" type="button"
+                                    style="background:linear-gradient(135deg,#61707a,#374151);"
+                                    onclick="reviewReport(${report.report_id}, 'dismissed')">Dismiss</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadReports(status) {
+            const reportsEl = document.getElementById('reportsEl');
+            reportsEl.innerHTML = '<div class="product-card"><strong>Loading reports...</strong></div>';
+            try {
+                const url = status
+                    ? `http://localhost:5000/api/reports?status=${status}`
+                    : 'http://localhost:5000/api/reports';
+                const response = await fetch(url, { headers: authHeaders() });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Could not load reports');
+                renderReports(data);
+            } catch (error) {
+                document.getElementById('reportsEl').innerHTML = `
+                    <div class="product-card">
+                        <strong>Could not load reports.</strong>
+                        <div class="small">${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        async function reviewReport(reportId, status) {
+            const note = document.getElementById(`report-note-${reportId}`)?.value || '';
+            try {
+                const response = await fetch(`http://localhost:5000/api/reports/${reportId}`, {
+                    method: 'PATCH',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ status, admin_note: note })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Could not update report');
+                setMessage(topMessage, data.message, 'success');
+                loadReports();
+            } catch (error) {
+                setMessage(topMessage, error.message, 'error');
+            }
+        }
+
+        window.reviewApplication = reviewApplication;
+        window.verifySellerPayment = verifySellerPayment;
+        window.openApplicationModal = openApplicationModal;
+        window.reviewProduct = reviewProduct;
+        window.confirmPayment = confirmPayment;
+        window.updateShipping = updateShipping;
+        window.reviewWithdrawal = reviewWithdrawal;
+        window.moderateReview = moderateReview;
+        window.loadReports = loadReports;
+        window.reviewReport = reviewReport;
+
+        document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+        document.getElementById('closeApplicationModalBtn').addEventListener('click', closeApplicationModal);
+        document.getElementById('hamburger').addEventListener('click', function() {
+            this.classList.toggle('open');
+            document.getElementById('navActions').classList.toggle('open');
+        });
+        shippingForm.addEventListener('submit', createShippingOption);
+        promoForm.addEventListener('submit', savePromoSettings);
+        applicationModal.addEventListener('click', (event) => {
+            if (event.target === applicationModal) {
+                closeApplicationModal();
+            }
+        });
+
+        if (ensureAdmin()) {
+            loadApplications();
+            loadProducts();
+            loadOrders();
+            loadShippingOptions();
+            loadWithdrawals();
+            loadAnalytics();
+            loadReviews();
+            loadPromoSettings();
+            loadPromoLogs();
+            loadReports();
+        }
+    </script>
+</body>
+</html>

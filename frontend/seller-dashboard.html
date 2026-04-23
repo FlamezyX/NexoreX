@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard | NexoreX</title>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #f4eee6 0%, #edf4f1 48%, #dde8ee 100%);
+            --panel: rgba(255, 255, 255, 0.9);
+            --panel-soft: rgba(255, 255, 255, 0.72);
+            --text: #1f2933;
+            --muted: #61707a;
+            --line: rgba(15, 23, 42, 0.1);
+            --brand: #9a3412;
+            --brand-deep: #7c2d12;
+            --accent: #0f766e;
+            --danger: #b42318;
+            --success: #166534;
+            --shadow: 0 24px 70px rgba(31, 41, 51, 0.12);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            font-family: "Trebuchet MS", Verdana, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(154, 52, 18, 0.14), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.16), transparent 30%),
+                var(--bg);
+            opacity: 0;
+            animation: fadeIn 0.45s ease forwards;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .shell {
+            width: min(1140px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 24px 0 42px;
+        }
+        .nav, .panel {
+            background: var(--panel);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.5s ease both;
+        }
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 18px;
+        }
+        .nav-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .link, .button {
+            font: inherit;
+            text-decoration: none;
+            border-radius: 999px;
+            padding: 10px 16px;
+            transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+        }
+        .link { color: var(--text); }
+        .link:hover { background: rgba(31,41,51,0.06); }
+        .button {
+            border: 0;
+            cursor: pointer;
+            color: #fff;
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%);
+            box-shadow: 0 10px 24px rgba(154,52,18,0.16);
+        }
+        .button:hover { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(154,52,18,0.26); }
+        .button:active { transform: translateY(0); }
+        .hero, .grid {
+            display: grid;
+            gap: 22px;
+            margin-top: 22px;
+        }
+        .hero { grid-template-columns: 1.1fr 0.9fr; }
+        .grid { grid-template-columns: 1fr 1fr; }
+        .panel { padding: 28px; }
+        .headline {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(2.3rem, 5vw, 4rem);
+            line-height: 0.98;
+            margin: 0 0 16px;
+            max-width: 12ch;
+        }
+        .subcopy, .status-copy, .small {
+            color: var(--muted);
+            line-height: 1.7;
+        }
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 8px 14px;
+            background: rgba(15, 118, 110, 0.1);
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .stats {
+            display: grid;
+            gap: 14px;
+        }
+        .stat {
+            padding: 18px;
+            border-radius: 22px;
+            background: var(--panel-soft);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+        }
+        .stat strong {
+            display: block;
+            font-size: 1.6rem;
+            margin-bottom: 4px;
+        }
+        form {
+            display: grid;
+            gap: 14px;
+            margin-top: 18px;
+        }
+        label {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+        input, textarea {
+            width: 100%;
+            margin-top: 6px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 14px 16px;
+            font: inherit;
+            background: #fff;
+        }
+        select {
+            width: 100%;
+            margin-top: 6px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 14px 16px;
+            font: inherit;
+            background: #fff;
+        }
+        textarea {
+            min-height: 130px;
+            resize: vertical;
+        }
+        .message {
+            min-height: 24px;
+            margin-top: 12px;
+            font-size: 0.95rem;
+        }
+        .message.error { color: var(--danger); }
+        .message.success { color: var(--success); }
+        .note-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 18px;
+        }
+        .note {
+            padding: 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.74);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+        }
+        .path-card {
+            padding: 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.74);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+        }
+        .notice {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(15, 118, 110, 0.08);
+            border: 1px solid rgba(15, 118, 110, 0.14);
+        }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 10px;
+            transition: background 0.2s ease;
+        }
+        .hamburger:hover { background: rgba(31,41,51,0.07); }
+        .hamburger span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--text);
+            border-radius: 2px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        @media (max-width: 980px) {
+            .hero, .grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 720px) {
+            .nav { flex-wrap: wrap; }
+            .nav-actions {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 4px;
+                padding-top: 8px;
+                border-top: 1px solid rgba(15,23,42,0.08);
+            }
+            .nav-actions.open { display: flex; }
+            .nav-actions a, .nav-actions button { text-align: left; border-radius: 14px; padding: 12px 14px; }
+            .hamburger { display: flex; }
+            .panel { padding: 22px; border-radius: 22px; }
+            .headline { font-size: clamp(1.8rem, 7vw, 2.8rem); }
+        }
+        @media (max-width: 480px) {
+            .shell { width: calc(100% - 24px); }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <nav class="nav">
+            <div>
+                <strong style="display:block; font-size:1.3rem; letter-spacing:0.05em; text-transform:uppercase;">NexoreX</strong>
+                <span id="navGreeting" class="small">Seller space</span>
+            </div>
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu" type="button">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-actions" id="navActions">
+                <a class="link" href="./index.html">Home Feed</a>
+                <a class="link" href="./seller-products.html">Manage Products</a>
+                <a class="link" href="./seller-orders.html">Seller Orders</a>
+                <a class="link" href="./seller-wallet.html">Wallet</a>
+                <a class="link" href="./seller-notifications.html">Notifications</a>
+                <a class="link" href="./chat.html">💬 Messages</a>
+                <button class="button" id="logoutBtn" type="button">Logout</button>
+            </div>
+        </nav>
+
+        <section class="hero">
+            <article class="panel">
+                <div class="pill" id="statusPill">Seller account</div>
+                <h1 class="headline" id="headline">Seller onboarding starts here.</h1>
+                <p class="subcopy" id="introText">
+                    Finish your seller application so Nexore can review and approve your store.
+                </p>
+                <div id="promoNotice" class="notice small">Checking promo availability...</div>
+                <div class="message" id="topMessage" aria-live="polite"></div>
+            </article>
+
+            <aside class="panel">
+                <div class="stats">
+                    <div class="stat">
+                        <strong id="statsName">-</strong>
+                        <span>Account holder</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="statsRole">Seller</strong>
+                        <span>Current role</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="statsStatus">Pending</strong>
+                        <span>Seller approval status</span>
+                    </div>
+                </div>
+            </aside>
+        </section>
+
+        <section class="grid">
+            <article class="panel">
+                <h2 style="margin:0;">Seller Application</h2>
+                <p class="status-copy">Choose the standard store activation path or apply through a promo free-store entry.</p>
+
+                <form id="sellerForm">
+                    <label>
+                        Application Path
+                        <select id="applicationType" required>
+                            <option value="paid">Paid Store Activation - ₦3,000</option>
+                            <option value="promo" id="promoOption">Promo Free Store Entry</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Business Name
+                        <input id="businessName" type="text" maxlength="150" required>
+                    </label>
+
+                    <label>
+                        Business Description
+                        <textarea id="businessDescription" maxlength="1000" placeholder="What do you sell and who do you serve?"></textarea>
+                    </label>
+
+                    <label>
+                        Phone
+                        <input id="phone" type="text" maxlength="20" placeholder="Business or contact phone">
+                    </label>
+
+                    <label>
+                        Location
+                        <input id="location" type="text" maxlength="100" placeholder="City or service area">
+                    </label>
+
+                    <div id="paidFields" class="path-card">
+                        <strong>Paid activation path</strong>
+                        <div class="small" style="margin-top:8px;">Standard seller activation costs ₦3,000. Add your bank transfer reference and, if available, upload payment proof so admin can verify it during review.</div>
+                        <label style="display:block; margin-top:12px;">
+                            Payment Reference
+                            <input id="paymentReference" type="text" maxlength="120" placeholder="Transfer reference for the ₦3,000 payment">
+                        </label>
+                        <label style="display:block; margin-top:12px;">
+                            Payment Proof Screenshot
+                            <input id="paymentProof" type="file" accept="image/png,image/jpeg,image/webp">
+                        </label>
+                        <div class="small" style="margin-top:8px;">Accepted formats: JPG, PNG, WEBP. Keep it under 5MB.</div>
+                    </div>
+
+                    <div id="promoFields" class="path-card" style="display:none;">
+                        <strong id="promoTitle">Promo free-store entry</strong>
+                        <div id="promoDescription" class="small" style="margin-top:8px;">Answer the current promo questions carefully. Selected applicants can receive a free store activation.</div>
+                        <div id="promoQuestionList"></div>
+                    </div>
+
+                    <button class="button" id="submitBtn" type="submit">Submit Seller Application</button>
+                </form>
+
+                <div class="message" id="formMessage" aria-live="polite"></div>
+            </article>
+
+            <article class="panel">
+                <h2 style="margin:0;">What Happens Next</h2>
+                <div class="note-list">
+                    <div class="note">
+                        <strong>1. Submit your application</strong>
+                        <div class="small">Your business details are saved for admin review.</div>
+                    </div>
+                    <div class="note">
+                        <strong>2. Admin reviews your seller profile</strong>
+                        <div class="small">Your seller status moves from pending to approved or rejected.</div>
+                    </div>
+                    <div class="note">
+                        <strong>3. Approved sellers can list products</strong>
+                        <div class="small">Once approved, we can unlock product upload and seller tools.</div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <script src="./app.js"></script>
+    <script>
+        const navGreeting = document.getElementById('navGreeting');
+        const headline = document.getElementById('headline');
+        const introText = document.getElementById('introText');
+        const statusPill = document.getElementById('statusPill');
+        const topMessage = document.getElementById('topMessage');
+        const statsName = document.getElementById('statsName');
+        const statsStatus = document.getElementById('statsStatus');
+        const sellerForm = document.getElementById('sellerForm');
+        const formMessage = document.getElementById('formMessage');
+        const submitBtn = document.getElementById('submitBtn');
+        const applicationType = document.getElementById('applicationType');
+        const promoOption = document.getElementById('promoOption');
+        const paidFields = document.getElementById('paidFields');
+        const promoFields = document.getElementById('promoFields');
+        const promoTitle = document.getElementById('promoTitle');
+        const promoDescription = document.getElementById('promoDescription');
+        const promoQuestionList = document.getElementById('promoQuestionList');
+        const promoNotice = document.getElementById('promoNotice');
+        const paymentProofInput = document.getElementById('paymentProof');
+        let activePromoQuestions = [];
+
+        function setMessage(target, text, type) {
+            target.textContent = text;
+            target.className = `message ${type}`;
+        }
+
+        function syncApplicationPath() {
+            const isPromo = applicationType.value === 'promo';
+            paidFields.style.display = isPromo ? 'none' : 'block';
+            promoFields.style.display = isPromo ? 'block' : 'none';
+        }
+
+        function renderPromoQuestions(questions) {
+            activePromoQuestions = Array.isArray(questions) ? questions : [];
+            promoQuestionList.innerHTML = activePromoQuestions.length
+                ? activePromoQuestions.map((question, index) => `
+                    <label style="display:block; margin-top:12px;">
+                        ${question}
+                        <textarea id="promoAnswer${index + 1}" maxlength="500"></textarea>
+                    </label>
+                `).join('')
+                : `
+                    <div class="small" style="margin-top:12px;">
+                        No promo questions are active right now.
+                    </div>
+                `;
+        }
+
+        function readFileAsDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('Could not read payment proof file'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function loadPromoSettings() {
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/promo-settings');
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not load promo settings');
+                }
+
+                const isActive = Number(data.is_active) === 1;
+                promoOption.hidden = !isActive;
+                promoTitle.textContent = data.promo_title || 'Promo free-store entry';
+                promoDescription.textContent = data.promo_description || 'Answer the active promo questions carefully. Selected applicants can receive a free store activation.';
+                renderPromoQuestions(data.promo_questions || []);
+                promoNotice.textContent = isActive
+                    ? `${data.promo_title || 'Free Store Promo'} is currently available. You can choose the promo path below if you want to apply for a free store.`
+                    : 'The free-store promo is currently unavailable. You can still apply through the standard ₦3,000 paid activation path.';
+
+                if (!isActive && applicationType.value === 'promo') {
+                    applicationType.value = 'paid';
+                }
+
+                syncApplicationPath();
+            } catch (error) {
+                promoOption.hidden = true;
+                promoNotice.textContent = 'Promo availability could not be loaded right now. The standard ₦3,000 paid activation path is still available.';
+                if (applicationType.value === 'promo') {
+                    applicationType.value = 'paid';
+                }
+                syncApplicationPath();
+            }
+        }
+
+        function hydrateSellerView(user) {
+            navGreeting.textContent = `${user.name}'s seller dashboard`;
+            statsName.textContent = user.name || 'Seller';
+            statsStatus.textContent = user.sellerStatus || 'pending';
+            statusPill.textContent = `Seller status: ${user.sellerStatus || 'pending'}`;
+
+            if (user.sellerStatus === 'approved') {
+                headline.textContent = `Welcome back, ${user.name}.`;
+                introText.textContent = 'Your seller account is approved. You can now manage products and move paid orders through fulfillment.';
+                setMessage(topMessage, 'Seller account approved. Product and order tools are ready for you.', 'success');
+                sellerForm.style.display = 'none';
+                if (!document.getElementById('approvedLink')) {
+                    const approvedLink = document.createElement('a');
+                    approvedLink.href = './seller-products.html';
+                    approvedLink.className = 'button';
+                    approvedLink.id = 'approvedLink';
+                    approvedLink.textContent = 'Open Product Manager';
+                    topMessage.insertAdjacentElement('afterend', approvedLink);
+                }
+                if (!document.getElementById('walletLink')) {
+                    const walletLink = document.createElement('a');
+                    walletLink.href = './seller-wallet.html';
+                    walletLink.className = 'button';
+                    walletLink.id = 'walletLink';
+                    walletLink.style.marginLeft = '12px';
+                    walletLink.textContent = 'Open Wallet';
+                    document.getElementById('approvedLink')?.insertAdjacentElement('afterend', walletLink);
+                }
+                return;
+            }
+
+            if (user.sellerStatus === 'pending') {
+                headline.textContent = `Hi ${user.name}, your seller account is pending review.`;
+                introText.textContent = 'If you have not submitted your business details yet, complete the seller application below. If you already submitted it, admin review is the next step.';
+            }
+
+            if (user.phone) {
+                document.getElementById('phone').value = user.phone;
+            }
+            if (user.location) {
+                document.getElementById('location').value = user.location;
+            }
+        }
+
+        function ensureSellerAuthenticated() {
+            const user = getStoredUser();
+            const token = getStoredToken();
+
+            if (!user || !token) {
+                window.location.href = './login.html';
+                return null;
+            }
+
+            if (user.role === 'admin') {
+                window.location.href = './admin-dashboard.html';
+                return null;
+            }
+
+            if (user.role !== 'seller') {
+                window.location.href = './buyer-dashboard.html';
+                return null;
+            }
+
+            hydrateSellerView(user);
+            return user;
+        }
+
+        sellerForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const user = getStoredUser();
+
+            if (!user) {
+                window.location.href = './login.html';
+                return;
+            }
+
+            const business_name = document.getElementById('businessName').value.trim();
+            const business_description = document.getElementById('businessDescription').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const location = document.getElementById('location').value.trim();
+            const selectedPath = applicationType.value;
+            const payment_reference = document.getElementById('paymentReference').value.trim();
+            const paymentProofFile = paymentProofInput.files?.[0];
+            const promo_answers = activePromoQuestions.map((_, index) => {
+                const field = document.getElementById(`promoAnswer${index + 1}`);
+                return field ? field.value.trim() : '';
+            });
+
+            if (!business_name) {
+                setMessage(formMessage, 'Business name is required.', 'error');
+                return;
+            }
+
+            if (selectedPath === 'paid' && !payment_reference && !paymentProofFile) {
+                setMessage(formMessage, 'Add a payment reference or upload payment proof for the ₦3,000 activation path.', 'error');
+                return;
+            }
+
+            if (selectedPath === 'promo' && promo_answers.some((answer) => !answer)) {
+                setMessage(formMessage, 'Please answer all promo questions to apply for the free-store promo.', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            try {
+                let payment_proof_data = '';
+                let payment_proof_name = '';
+
+                if (selectedPath === 'paid' && paymentProofFile) {
+                    payment_proof_data = await readFileAsDataUrl(paymentProofFile);
+                    payment_proof_name = paymentProofFile.name;
+                }
+
+                const response = await fetch('http://localhost:5000/api/auth/seller-application', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        business_name,
+                        business_description,
+                        phone,
+                        location,
+                        application_type: selectedPath,
+                        payment_reference,
+                        payment_proof_name,
+                        payment_proof_data,
+                        promo_answers
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    setMessage(formMessage, data.message || 'Could not submit seller application.', 'error');
+                    return;
+                }
+
+                const updatedUser = {
+                    ...user,
+                    sellerStatus: 'pending',
+                    phone: phone || user.phone,
+                    location: location || user.location
+                };
+                saveStoredUser(updatedUser);
+                hydrateSellerView(updatedUser);
+                setMessage(formMessage, data.message || 'Seller application submitted.', 'success');
+                sellerForm.reset();
+                applicationType.value = 'paid';
+                syncApplicationPath();
+                renderPromoQuestions(activePromoQuestions);
+            } catch (error) {
+                setMessage(formMessage, 'Could not connect to the server.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Seller Application';
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+        applicationType.addEventListener('change', syncApplicationPath);
+        syncApplicationPath();
+        loadPromoSettings();
+        ensureSellerAuthenticated();
+        document.getElementById('hamburger').addEventListener('click', function() {
+            this.classList.toggle('open');
+            document.getElementById('navActions').classList.toggle('open');
+        });
+    </script>
+</body>
+</html>

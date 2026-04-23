@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart | NexoreX</title>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #f6efe5 0%, #edf4f3 48%, #e6edf4 100%);
+            --panel: rgba(255,255,255,0.92);
+            --panel-soft: rgba(255,255,255,0.76);
+            --text: #1f2933;
+            --muted: #61707a;
+            --line: rgba(15,23,42,0.1);
+            --brand: #c05621;
+            --brand-deep: #7c2d12;
+            --shadow: 0 24px 70px rgba(31,41,51,0.12);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { min-height:100vh; font-family:"Trebuchet MS", Verdana, sans-serif; color:var(--text); background:var(--bg); opacity:0; animation:fadeIn 0.45s ease forwards; }
+        @keyframes fadeIn { to { opacity:1; } }
+        @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        .shell { width:min(1100px, calc(100% - 32px)); margin:0 auto; padding:24px 0 42px; }
+        .nav, .panel { background:var(--panel); border:1px solid rgba(255,255,255,0.84); border-radius:28px; box-shadow:var(--shadow); backdrop-filter: blur(10px); animation:slideUp 0.5s ease both; }
+        .nav { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:16px 18px; }
+        .nav-actions { display:flex; gap:10px; flex-wrap:wrap; }
+        .link, .button { font:inherit; text-decoration:none; border-radius:999px; padding:10px 16px; transition:transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease; }
+        .link { color:var(--text); }
+        .link:hover { background:rgba(31,41,51,0.06); }
+        .button { border:0; cursor:pointer; color:#fff; background:linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%); box-shadow:0 10px 24px rgba(124,45,18,0.16); }
+        .button:hover { transform:translateY(-2px); box-shadow:0 16px 32px rgba(124,45,18,0.24); }
+        .button:active { transform:translateY(0); }
+        .grid { display:grid; grid-template-columns: 1.1fr 0.9fr; gap:22px; margin-top:22px; }
+        .panel { padding:28px; }
+        .cart-list { display:grid; gap:14px; margin-top:18px; }
+        .cart-item { display:grid; grid-template-columns: 110px 1fr auto; gap:14px; align-items:center; padding:14px; border-radius:22px; background:var(--panel-soft); border:1px solid rgba(15,23,42,0.08); transition:transform 0.2s ease, box-shadow 0.2s ease; }
+        .cart-item:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba(31,41,51,0.09); }
+        .cart-item img { width:110px; height:90px; object-fit:cover; border-radius:18px; background:#ebe7e0; }
+        .qty-input { width:84px; border:1px solid var(--line); border-radius:12px; padding:10px 12px; font:inherit; }
+        .summary-line { display:flex; justify-content:space-between; gap:12px; margin-top:12px; color:var(--muted); }
+        .empty { padding:28px; border-radius:22px; text-align:center; border:1px dashed rgba(15,23,42,0.16); background:linear-gradient(135deg, rgba(255,255,255,0.7), rgba(244,248,247,0.95)); }
+        .hamburger {
+            display: none; flex-direction: column; gap: 5px;
+            background: none; border: none; cursor: pointer;
+            padding: 6px; border-radius: 10px; transition: background 0.2s ease;
+        }
+        .hamburger:hover { background: rgba(31,41,51,0.07); }
+        .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: transform 0.3s ease, opacity 0.3s ease; }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+        @media (max-width: 720px) {
+            .nav { flex-wrap: wrap; }
+            .nav-actions {
+                display: none; width: 100%; flex-direction: column;
+                align-items: stretch; gap: 4px;
+                padding-top: 8px; border-top: 1px solid rgba(15,23,42,0.08);
+            }
+            .nav-actions.open { display: flex; }
+            .nav-actions a, .nav-actions button { text-align: left; border-radius: 14px; padding: 12px 14px; }
+            .hamburger { display: flex; }
+            .panel { padding: 22px; border-radius: 22px; }
+        }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+        @media (max-width: 480px) {
+            .shell { width: calc(100% - 24px); }
+            .cart-item { grid-template-columns: 1fr; }
+            .cart-item img { width: 100%; height: 180px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <nav class="nav">
+            <div>
+                <strong style="display:block; font-size:1.3rem; letter-spacing:0.05em; text-transform:uppercase;">NexoreX</strong>
+                <span style="color:var(--muted);">Buyer cart</span>
+            </div>
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu" type="button">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-actions" id="navActions">
+                <a class="link" href="./index.html">Home Feed</a>
+                <a class="link" href="./orders.html">Orders</a>
+                <button class="button" id="logoutBtn" type="button">Logout</button>
+            </div>
+        </nav>
+
+        <section class="grid">
+            <article class="panel">
+                <h2 style="margin-top:0;">Your Cart</h2>
+                <div id="cartList" class="cart-list"></div>
+            </article>
+            <aside class="panel">
+                <h2 style="margin-top:0;">Summary</h2>
+                <div class="summary-line"><span>Items</span><strong id="summaryCount">0</strong></div>
+                <div class="summary-line"><span>Subtotal</span><strong id="summarySubtotal">₦0.00</strong></div>
+                <div class="summary-line"><span>Shipping</span><strong>Calculated at checkout</strong></div>
+                <button class="button" id="checkoutBtn" type="button" style="margin-top:18px; width:100%;">Go To Checkout</button>
+            </aside>
+        </section>
+    </main>
+
+    <script src="./app.js"></script>
+    <script>
+        const cartList = document.getElementById('cartList');
+        const summaryCount = document.getElementById('summaryCount');
+        const summarySubtotal = document.getElementById('summarySubtotal');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+
+        function ensureBuyer() {
+            const user = getStoredUser();
+            const token = getStoredToken();
+            if (!user || !token) {
+                window.location.href = './login.html';
+                return null;
+            }
+            if (user.role === 'admin') {
+                window.location.href = './admin-dashboard.html';
+                return null;
+            }
+            if (user.role === 'seller') {
+                window.location.href = './seller-dashboard.html';
+                return null;
+            }
+            return user;
+        }
+
+        function formatPrice(value) {
+            return formatMoney(value);
+        }
+
+        function renderCart() {
+            const cart = getCart();
+            const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            summaryCount.textContent = String(count);
+            summarySubtotal.textContent = formatPrice(subtotal);
+
+            if (!cart.length) {
+                cartList.innerHTML = '<div class="empty"><strong>Your cart is empty.</strong><div style="color:var(--muted); margin-top:8px;">Add products from the home feed to begin checkout.</div></div>';
+                checkoutBtn.disabled = true;
+                checkoutBtn.style.opacity = '0.7';
+                return;
+            }
+
+            checkoutBtn.disabled = false;
+            checkoutBtn.style.opacity = '1';
+            cartList.innerHTML = cart.map((item) => `
+                <div class="cart-item">
+                    <img src="${item.image_url}" alt="${item.name}">
+                    <div>
+                        <strong>${item.name}</strong>
+                        <div style="color:var(--muted); margin-top:6px;">${formatPrice(item.price)} each</div>
+                    </div>
+                    <div style="display:grid; gap:10px;">
+                        <input class="qty-input" type="number" min="1" step="1" value="${item.quantity}" onchange="changeQty(${item.product_id}, this.value)">
+                        <button class="button" type="button" onclick="removeItem(${item.product_id})">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function changeQty(productId, value) {
+            updateCartQuantity(productId, Number(value));
+            renderCart();
+        }
+
+        function removeItem(productId) {
+            updateCartQuantity(productId, 0);
+            renderCart();
+        }
+
+        window.changeQty = changeQty;
+        window.removeItem = removeItem;
+
+        document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+        checkoutBtn.addEventListener('click', () => { window.location.href = './checkout.html'; });
+        document.getElementById('hamburger').addEventListener('click', function() {
+            this.classList.toggle('open');
+            document.getElementById('navActions').classList.toggle('open');
+        });
+        if (ensureBuyer()) { renderCart(); }
+    </script>
+</body>
+</html>
