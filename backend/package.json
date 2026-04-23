@@ -1,0 +1,36 @@
+{
+  "name": "@nexorex/backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "promote-admin": "node scripts/promote-admin.js",
+    "seed-shipping": "node scripts/seed-shipping.js",
+    "upgrade-reviews": "node scripts/upgrade-review-moderation.js",
+    "upgrade-seller-fees": "node scripts/upgrade-seller-application-fees.js",
+    "upgrade-seller-payment-proofs": "node scripts/upgrade-seller-payment-proofs.js",
+    "upgrade-promo-settings": "node scripts/upgrade-promo-settings.js",
+    "upgrade-promo-ops": "node scripts/upgrade-promo-ops.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.3.2",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.22.1",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
