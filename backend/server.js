@@ -10,10 +10,24 @@ require('dotenv').config();
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-    cors: { origin: '*' }
+    cors: {
+        origin: [
+            'https://nexorex.vercel.app',
+            'http://localhost:5500',
+            'http://127.0.0.1:5500'
+        ],
+        credentials: true
+    }
 });
 
-app.use(cors());
+app.use(cors({
+    origin: [
+        'https://nexorex.vercel.app',
+        'http://localhost:5500',
+        'http://127.0.0.1:5500'
+    ],
+    credentials: true
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
