@@ -386,6 +386,17 @@
             </article>
 
             <article class="panel">
+                <h2 style="margin:0;">Post Moderation</h2>
+                <p class="small">Review seller posts before they go live on the community feed. Approve to publish, reject with a note.</p>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+                    <button class="button" type="button" onclick="loadPosts('pending')">Pending</button>
+                    <button class="button" type="button" style="background:linear-gradient(135deg,#166534,#14532d);" onclick="loadPosts('approved')">Approved</button>
+                    <button class="button" type="button" style="background:linear-gradient(135deg,#b42318,#7f1d1d);" onclick="loadPosts('rejected')">Rejected</button>
+                </div>
+                <div id="postsEl" class="products"></div>
+            </article>
+
+            <article class="panel">
                 <h2 style="margin:0;">Promo Settings</h2>
                 <p class="small">Turn the free-store promo on or off and set the live promo questions sellers should answer when it is active.</p>
                 <form id="promoForm" class="shipping-form">
@@ -1403,6 +1414,71 @@
             }
         }
 
+        function renderPosts(posts) {
+            const postsEl = document.getElementById('postsEl');
+            if (!posts.length) {
+                postsEl.innerHTML = `
+                    <div class="product-card">
+                        <strong>No posts found.</strong>
+                        <div class="small">Seller posts will appear here.</div>
+                    </div>
+                `;
+                return;
+            }
+            postsEl.innerHTML = posts.map((post) => `
+                <div class="product-card">
+                    <div class="product-head">
+                        <div>
+                            <strong>${post.seller_name}</strong>
+                            <div class="small">${post.seller_email} | ${formatDate(post.created_at)}</div>
+                        </div>
+                        <span class="badge">${post.status}</span>
+                    </div>
+                    <p class="small" style="margin:12px 0 0; white-space:pre-wrap;">${post.caption}</p>
+                    ${post.product_name ? `<div class="small" style="margin-top:8px;">🏷️ Tagged: ${post.product_name}</div>` : ''}
+                    ${post.image_url ? `<img src="https://nexorex.onrender.com${post.image_url}" alt="Post image" style="width:100%;max-height:200px;object-fit:cover;border-radius:14px;margin-top:10px;">` : ''}
+                    <textarea id="post-note-${post.post_id}" placeholder="Admin note (optional, shown to seller on rejection)">${post.admin_note || ''}</textarea>
+                    <div class="card-actions" style="margin-top:12px;">
+                        <span class="small">❤️ ${post.like_count} likes</span>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            ${post.status !== 'approved' ? `<button class="button" type="button" onclick="reviewPost(${post.post_id}, 'approved')">Approve</button>` : ''}
+                            ${post.status !== 'rejected' ? `<button class="button" type="button" style="background:linear-gradient(135deg,#b42318,#7f1d1d);" onclick="reviewPost(${post.post_id}, 'rejected')">Reject</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadPosts(status = 'pending') {
+            const postsEl = document.getElementById('postsEl');
+            postsEl.innerHTML = '<div class="product-card"><strong>Loading posts...</strong></div>';
+            try {
+                const response = await fetch(`https://nexorex.onrender.com/api/posts/admin?status=${status}`, { headers: authHeaders() });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Could not load posts');
+                renderPosts(data);
+            } catch (error) {
+                postsEl.innerHTML = `<div class="product-card"><strong>Could not load posts.</strong><div class="small">${error.message}</div></div>`;
+            }
+        }
+
+        async function reviewPost(postId, status) {
+            const note = document.getElementById(`post-note-${postId}`)?.value || '';
+            try {
+                const response = await fetch(`https://nexorex.onrender.com/api/posts/${postId}/review`, {
+                    method: 'PATCH',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ status, admin_note: note })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Could not review post');
+                setMessage(topMessage, data.message, 'success');
+                loadPosts();
+            } catch (error) {
+                setMessage(topMessage, error.message, 'error');
+            }
+        }
+
         window.reviewApplication = reviewApplication;
         window.verifySellerPayment = verifySellerPayment;
         window.openApplicationModal = openApplicationModal;
@@ -1413,6 +1489,8 @@
         window.moderateReview = moderateReview;
         window.loadReports = loadReports;
         window.reviewReport = reviewReport;
+        window.loadPosts = loadPosts;
+        window.reviewPost = reviewPost;
 
         document.getElementById('logoutBtn').addEventListener('click', logoutUser);
         document.getElementById('closeApplicationModalBtn').addEventListener('click', closeApplicationModal);
@@ -1439,6 +1517,7 @@
             loadPromoSettings();
             loadPromoLogs();
             loadReports();
+            loadPosts();
         }
     </script>
 </body>

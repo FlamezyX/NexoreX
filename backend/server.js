@@ -46,6 +46,8 @@ const reviewRoutes = require('./routes/review');
 const chatRoutes = require('./routes/chat');
 const reportRoutes = require('./routes/report');
 const superAdminRoutes = require('./routes/superAdmin');
+const platformSettingsRoutes = require('./routes/platformSettings');
+const postRoutes = require('./routes/post');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
@@ -58,6 +60,8 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/super-admin', superAdminRoutes);
+app.use('/api/platform-settings', platformSettingsRoutes);
+app.use('/api/posts', postRoutes);
 
 // Socket.io — real-time chat
 const onlineUsers = new Map();

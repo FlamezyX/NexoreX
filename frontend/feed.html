@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed | NexoreX</title>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #f6efe5 0%, #f6f5ef 32%, #dce7ea 100%);
+            --surface: rgba(255,255,255,0.92);
+            --text: #1f2933;
+            --muted: #5f6b73;
+            --line: rgba(15,23,42,0.1);
+            --brand: #c05621;
+            --brand-deep: #7c2d12;
+            --teal: #0f766e;
+            --shadow: 0 24px 70px rgba(31,41,51,0.12);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            font-family: "Trebuchet MS", Verdana, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(192,86,33,0.12), transparent 30%),
+                radial-gradient(circle at top right, rgba(15,118,110,0.14), transparent 34%),
+                var(--bg);
+            opacity: 0;
+            animation: fadeIn 0.45s ease forwards;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .shell { width: min(680px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 48px; }
+
+        .nav {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 16px; padding: 14px 18px; margin-bottom: 28px;
+            background: rgba(255,255,255,0.72); border: 1px solid rgba(255,255,255,0.8);
+            border-radius: 24px; backdrop-filter: blur(12px);
+            box-shadow: 0 16px 50px rgba(31,41,51,0.08);
+            animation: slideUp 0.5s ease both;
+        }
+        .brand strong { font-size: 1.3rem; letter-spacing: 0.06em; text-transform: uppercase; }
+        .brand span { color: var(--muted); font-size: 0.88rem; display: block; }
+        .nav-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .link { color: var(--text); text-decoration: none; padding: 9px 14px; border-radius: 999px; transition: background 0.2s; font: inherit; }
+        .link:hover { background: rgba(31,41,51,0.06); }
+        .button { border: 0; border-radius: 999px; padding: 10px 18px; cursor: pointer; color: #fff; font: inherit; text-decoration: none; background: linear-gradient(135deg, var(--brand), var(--brand-deep)); box-shadow: 0 10px 24px rgba(124,45,18,0.16); transition: transform 0.18s ease, box-shadow 0.18s ease; }
+        .button:hover { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(124,45,18,0.24); }
+        .button:active { transform: translateY(0); }
+        .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; border-radius: 10px; transition: background 0.2s; }
+        .hamburger:hover { background: rgba(31,41,51,0.07); }
+        .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: transform 0.3s ease, opacity 0.3s ease; }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        /* Post cards */
+        .feed { display: grid; gap: 22px; }
+
+        .post-card {
+            background: var(--surface); border: 1px solid rgba(255,255,255,0.8);
+            border-radius: 28px; box-shadow: var(--shadow); backdrop-filter: blur(10px);
+            overflow: hidden; animation: slideUp 0.5s ease both;
+        }
+
+        .post-header {
+            display: flex; align-items: center; gap: 12px;
+            padding: 18px 20px 14px;
+        }
+        .post-avatar {
+            width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+            background: linear-gradient(135deg, var(--brand), var(--teal));
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-weight: 700; font-size: 1rem;
+        }
+        .post-seller-name { font-weight: 700; font-size: 0.95rem; }
+        .post-time { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
+
+        .post-image { width: 100%; max-height: 480px; object-fit: cover; display: block; }
+
+        .post-body { padding: 16px 20px; }
+        .post-caption { line-height: 1.65; font-size: 0.97rem; margin-bottom: 14px; }
+
+        .post-product {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 14px; border-radius: 16px;
+            background: rgba(192,86,33,0.06); border: 1px solid rgba(192,86,33,0.14);
+            margin-bottom: 14px; text-decoration: none; color: var(--text);
+            transition: background 0.2s;
+        }
+        .post-product:hover { background: rgba(192,86,33,0.1); }
+        .post-product img { width: 48px; height: 48px; object-fit: cover; border-radius: 10px; background: #ebe7e0; flex-shrink: 0; }
+        .post-product-info strong { display: block; font-size: 0.92rem; }
+        .post-product-info span { color: var(--brand-deep); font-weight: 700; font-size: 0.88rem; }
+
+        .post-actions {
+            display: flex; align-items: center; gap: 14px;
+            padding: 12px 20px; border-top: 1px solid var(--line);
+            flex-wrap: wrap;
+        }
+        .like-btn {
+            display: flex; align-items: center; gap: 6px;
+            background: none; border: none; cursor: pointer; font: inherit;
+            color: var(--muted); font-size: 0.92rem; padding: 6px 10px;
+            border-radius: 999px; transition: background 0.2s, color 0.2s;
+        }
+        .like-btn:hover { background: rgba(192,86,33,0.08); color: var(--brand); }
+        .like-btn.liked { color: var(--brand); font-weight: 700; }
+        .like-btn .heart { font-size: 1.1rem; }
+
+        .share-btn {
+            display: flex; align-items: center; gap: 6px;
+            background: none; border: none; cursor: pointer; font: inherit;
+            color: var(--muted); font-size: 0.92rem; padding: 6px 10px;
+            border-radius: 999px; transition: background 0.2s, color 0.2s;
+        }
+        .share-btn:hover { background: rgba(15,118,110,0.08); color: var(--teal); }
+
+        .share-menu {
+            position: relative; display: inline-block;
+        }
+        .share-dropdown {
+            position: absolute; bottom: calc(100% + 8px); left: 0;
+            background: var(--surface); border: 1px solid var(--line);
+            border-radius: 16px; box-shadow: var(--shadow);
+            padding: 8px; display: none; z-index: 10; min-width: 180px;
+        }
+        .share-dropdown.open { display: block; }
+        .share-option {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 10px; cursor: pointer;
+            font-size: 0.9rem; color: var(--text); transition: background 0.15s;
+            border: none; background: none; font: inherit; width: 100%; text-align: left;
+        }
+        .share-option:hover { background: rgba(15,23,42,0.06); }
+
+        .empty-feed {
+            text-align: center; padding: 60px 24px;
+            background: var(--surface); border-radius: 28px;
+            box-shadow: var(--shadow);
+        }
+        .empty-feed h3 { font-size: 1.5rem; margin-bottom: 10px; }
+        .empty-feed p { color: var(--muted); line-height: 1.7; }
+
+        .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
+
+        @media (max-width: 720px) {
+            .nav { flex-wrap: wrap; }
+            .nav-actions { display: none; width: 100%; flex-direction: column; align-items: stretch; gap: 4px; padding-top: 8px; border-top: 1px solid var(--line); }
+            .nav-actions.open { display: flex; }
+            .nav-actions a, .nav-actions button { text-align: left; border-radius: 14px; padding: 12px 14px; }
+            .hamburger { display: flex; }
+        }
+        @media (max-width: 480px) { .shell { width: calc(100% - 24px); } }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <nav class="nav">
+            <div class="brand">
+                <strong>NexoreX</strong>
+                <span>Community Feed</span>
+            </div>
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu" type="button">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-actions" id="navActions">
+                <a class="link" href="./index.html">Home</a>
+                <a class="link" id="dashLink" href="./login.html">Dashboard</a>
+                <span id="authBtn"><a class="button" href="./login.html">Login</a></span>
+            </div>
+        </nav>
+
+        <div id="feed" class="feed"></div>
+        <div id="pagination" class="pagination"></div>
+    </main>
+
+    <script src="./app.js"></script>
+    <script>
+        const API = 'http://localhost:5000';
+        let currentPage = 1;
+        let currentUser = null;
+
+        function init() {
+            currentUser = getStoredUser();
+            const token = getStoredToken();
+
+            const dashLink = document.getElementById('dashLink');
+            const authBtn = document.getElementById('authBtn');
+
+            if (currentUser && token) {
+                const dash = currentUser.role === 'admin' ? './admin-dashboard.html'
+                    : currentUser.role === 'seller' ? './seller-dashboard.html'
+                    : './buyer-dashboard.html';
+                dashLink.href = dash;
+                dashLink.textContent = 'Dashboard';
+                authBtn.innerHTML = `<button class="button" onclick="logoutUser()">Logout</button>`;
+            }
+
+            document.getElementById('hamburger').addEventListener('click', function() {
+                this.classList.toggle('open');
+                document.getElementById('navActions').classList.toggle('open');
+            });
+
+            loadFeed();
+        }
+
+        function timeAgo(dateStr) {
+            const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+            if (diff < 60) return 'just now';
+            if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+            return `${Math.floor(diff / 86400)}d ago`;
+        }
+
+        function escHtml(str) {
+            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function getShareUrl(postId) {
+            return `${window.location.origin}/feed.html?post=${postId}`;
+        }
+
+        function shareWhatsApp(postId, caption) {
+            const text = encodeURIComponent(`Check this out on NexoreX!\n\n"${caption.slice(0, 100)}"\n\n${getShareUrl(postId)}`);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+
+        function shareFacebook(postId) {
+            const url = encodeURIComponent(getShareUrl(postId));
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+        }
+
+        function copyLink(postId) {
+            navigator.clipboard.writeText(getShareUrl(postId)).then(() => {
+                alert('Link copied to clipboard!');
+            });
+        }
+
+        function toggleShareMenu(postId) {
+            document.querySelectorAll('.share-dropdown').forEach(d => {
+                if (d.dataset.post !== String(postId)) d.classList.remove('open');
+            });
+            document.querySelector(`.share-dropdown[data-post="${postId}"]`)?.classList.toggle('open');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.share-menu')) {
+                document.querySelectorAll('.share-dropdown').forEach(d => d.classList.remove('open'));
+            }
+        });
+
+        async function toggleLike(postId, btn) {
+            if (!currentUser) { window.location.href = './login.html'; return; }
+            try {
+                const res = await fetch(`${API}/api/posts/${postId}/like`, {
+                    method: 'POST', headers: authHeaders()
+                });
+                const data = await res.json();
+                if (!res.ok) return;
+                const liked = data.liked;
+                btn.classList.toggle('liked', liked);
+                const countEl = btn.querySelector('.like-count');
+                countEl.textContent = Number(countEl.textContent) + (liked ? 1 : -1);
+            } catch {}
+        }
+
+        function renderPosts(posts) {
+            const feed = document.getElementById('feed');
+            if (!posts.length) {
+                feed.innerHTML = `<div class="empty-feed"><h3>No posts yet</h3><p>Sellers haven't posted anything yet. Check back soon.</p></div>`;
+                return;
+            }
+
+            feed.innerHTML = posts.map(post => `
+                <article class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar">${escHtml(post.seller_name).charAt(0).toUpperCase()}</div>
+                        <div>
+                            <div class="post-seller-name">${escHtml(post.seller_name)}</div>
+                            <div class="post-time">${timeAgo(post.created_at)}</div>
+                        </div>
+                    </div>
+
+                    ${post.image_url ? `<img class="post-image" src="${API}${post.image_url}" alt="Post image">` : ''}
+
+                    <div class="post-body">
+                        <p class="post-caption">${escHtml(post.caption)}</p>
+
+                        ${post.product_id && post.product_name ? `
+                            <a class="post-product" href="./index.html#productsSection">
+                                ${post.product_image ? `<img src="${escHtml(post.product_image)}" alt="${escHtml(post.product_name)}">` : ''}
+                                <div class="post-product-info">
+                                    <strong>${escHtml(post.product_name)}</strong>
+                                    <span>${formatMoney(post.price)}</span>
+                                </div>
+                            </a>
+                        ` : ''}
+                    </div>
+
+                    <div class="post-actions">
+                        <button class="like-btn ${post.liked_by_me ? 'liked' : ''}"
+                            onclick="toggleLike(${post.post_id}, this)">
+                            <span class="heart">${post.liked_by_me ? '❤️' : '🤍'}</span>
+                            <span class="like-count">${post.like_count}</span>
+                        </button>
+
+                        <div class="share-menu">
+                            <button class="share-btn" onclick="toggleShareMenu(${post.post_id})">
+                                🔗 Share
+                            </button>
+                            <div class="share-dropdown" data-post="${post.post_id}">
+                                <button class="share-option" onclick="shareWhatsApp(${post.post_id}, '${escHtml(post.caption).replace(/'/g, "\\'")}')">
+                                    💬 Share on WhatsApp
+                                </button>
+                                <button class="share-option" onclick="shareFacebook(${post.post_id})">
+                                    📘 Share on Facebook
+                                </button>
+                                <button class="share-option" onclick="copyLink(${post.post_id})">
+                                    📋 Copy Link
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        function renderPagination(page, totalPages) {
+            const pag = document.getElementById('pagination');
+            if (totalPages <= 1) { pag.innerHTML = ''; return; }
+            let html = '';
+            if (page > 1) html += `<button class="button" style="background:rgba(255,255,255,0.6);border:1px solid var(--line);color:var(--text);box-shadow:none;" onclick="goToPage(${page - 1})">← Prev</button>`;
+            for (let i = Math.max(1, page - 2); i <= Math.min(totalPages, page + 2); i++) {
+                html += `<button class="button ${i === page ? '' : ''}" style="${i !== page ? 'background:rgba(255,255,255,0.6);border:1px solid var(--line);color:var(--text);box-shadow:none;' : ''}" onclick="goToPage(${i})">${i}</button>`;
+            }
+            if (page < totalPages) html += `<button class="button" style="background:rgba(255,255,255,0.6);border:1px solid var(--line);color:var(--text);box-shadow:none;" onclick="goToPage(${page + 1})">Next →</button>`;
+            pag.innerHTML = html;
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            loadFeed();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        window.goToPage = goToPage;
+        window.toggleLike = toggleLike;
+        window.toggleShareMenu = toggleShareMenu;
+        window.shareWhatsApp = shareWhatsApp;
+        window.shareFacebook = shareFacebook;
+        window.copyLink = copyLink;
+
+        async function loadFeed() {
+            const feed = document.getElementById('feed');
+            feed.innerHTML = '<div class="empty-feed"><p>Loading posts...</p></div>';
+            try {
+                const headers = currentUser ? authHeaders() : {};
+                const res = await fetch(`${API}/api/posts/feed?page=${currentPage}&limit=10`, { headers });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message);
+                renderPosts(data.posts || []);
+                renderPagination(data.page, data.totalPages);
+            } catch (err) {
+                feed.innerHTML = `<div class="empty-feed"><h3>Could not load feed</h3><p>${err.message}</p></div>`;
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

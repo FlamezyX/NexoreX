@@ -144,7 +144,8 @@ exports.applySeller = (req, res) => {
         payment_proof_url,
         payment_proof_name,
         payment_proof_data,
-        promo_answers
+        promo_answers,
+        terms_accepted
     } = req.body;
     const applicationType = application_type === 'promo' ? 'promo' : 'paid';
     const normalizedPromoAnswers = Array.isArray(promo_answers)
@@ -155,6 +156,10 @@ exports.applySeller = (req, res) => {
 
     if (!user_id || !business_name) {
         return res.status(400).json({ message: 'User ID and business name are required' });
+    }
+
+    if (!terms_accepted) {
+        return res.status(400).json({ message: 'You must accept the Terms and Conditions to proceed' });
     }
 
     if (applicationType === 'paid' && !normalizedPaymentReference && !normalizedPaymentProofUrl && !payment_proof_data) {
@@ -230,8 +235,8 @@ exports.applySeller = (req, res) => {
                         `INSERT INTO seller_applications
                         (user_id, business_name, business_description, phone, location, application_type,
                         store_fee_amount, payment_status, payment_reference, payment_proof_url,
-                        promo_status, promo_answers, status)
-                        VALUES (?, ?, ?, ?, ?, ?, 3000.00, ?, ?, ?, ?, ?, 'pending')`,
+                        promo_status, promo_answers, status, terms_accepted_at)
+                        VALUES (?, ?, ?, ?, ?, ?, 3000.00, ?, ?, ?, ?, ?, 'pending', NOW())`,
                         [
                             user_id,
                             business_name.trim(),

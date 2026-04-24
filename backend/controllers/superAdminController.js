@@ -280,6 +280,70 @@ exports.searchUsers = async (req, res) => {
     }
 };
 
+// GET /api/super-admin/search-sellers?q= — search sellers with pending applications for fee waiver
+exports.searchSellers = async (req, res) => {
+    try {
+        const query = req.query.q?.trim();
+        if (!query || query.length < 2) {
+            return res.status(400).json({ message: 'Search query must be at least 2 characters' });
+        }
+
+        const rows = await queryAsync(
+            `SELECT
+                sa.application_id, sa.business_name, sa.payment_status, sa.store_fee_amount,
+                u.user_id, u.fullname, u.email
+             FROM seller_applications sa
+             INNER JOIN users u ON sa.user_id = u.user_id
+             WHERE (u.fullname LIKE ? OR u.email LIKE ? OR sa.business_name LIKE ?)
+               AND sa.application_type = 'paid'
+               AND sa.status = 'pending'
+             ORDER BY sa.submitted_at DESC
+             LIMIT 10`,
+            [`%${query}%`, `%${query}%`, `%${query}%`]
+        );
+
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// PATCH /api/super-admin/waive-fee/:applicationId — toggle payment requirement on/off
+exports.waiveFee = async (req, res) => {
+    try {
+        const applicationId = Number(req.params.applicationId);
+        const { waive } = req.body; // true = waive fee, false = restore fee
+
+        const apps = await queryAsync(
+            `SELECT sa.application_id, sa.payment_status, sa.store_fee_amount, u.fullname
+             FROM seller_applications sa
+             INNER JOIN users u ON sa.user_id = u.user_id
+             WHERE sa.application_id = ? AND sa.application_type = 'paid' AND sa.status = 'pending'`,
+            [applicationId]
+        );
+
+        if (!apps.length) {
+            return res.status(404).json({ message: 'Pending paid application not found' });
+        }
+
+        if (waive) {
+            await queryAsync(
+                `UPDATE seller_applications SET payment_status = 'not_required', store_fee_amount = 0 WHERE application_id = ?`,
+                [applicationId]
+            );
+            return res.json({ message: `Activation fee waived for ${apps[0].fullname}`, payment_status: 'not_required' });
+        } else {
+            await queryAsync(
+                `UPDATE seller_applications SET payment_status = 'pending', store_fee_amount = 3000.00 WHERE application_id = ?`,
+                [applicationId]
+            );
+            return res.json({ message: `Activation fee restored for ${apps[0].fullname}`, payment_status: 'pending' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // GET /api/super-admin/search-team?q= — search sub-admins and sellers to message
 exports.searchTeam = async (req, res) => {
     try {

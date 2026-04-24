@@ -273,6 +273,21 @@
             </div>
         </div>
 
+        <!-- Seller Terms & Conditions -->
+        <div class="grid" style="grid-template-columns:1fr; margin-top:22px;">
+            <div class="panel">
+                <h2 style="margin-bottom:6px;">Seller Terms &amp; Conditions</h2>
+                <p class="small">This text is shown to sellers on the application form. They must agree before submitting. Edit it anytime and save — changes reflect immediately.</p>
+                <form id="termsForm" style="display:grid; gap:14px; margin-top:18px;">
+                    <textarea class="search-input" id="sellerTerms" rows="20" style="border-radius:16px; padding:16px; font-size:0.9rem; line-height:1.7; resize:vertical;"></textarea>
+                    <div>
+                        <button class="button" id="termsSaveBtn" type="submit">Save Terms &amp; Conditions</button>
+                    </div>
+                </form>
+                <div id="termsMessage" class="message" aria-live="polite"></div>
+            </div>
+        </div>
+
         <!-- Bank details -->
         <div class="grid" style="grid-template-columns:1fr; margin-top:22px;">
             <div class="panel">
@@ -304,6 +319,32 @@
                     </div>
                 </form>
                 <div id="bankMessage" class="message" aria-live="polite"></div>
+            </div>
+        </div>
+
+        <!-- Fee Waiver -->
+        <div class="grid" style="grid-template-columns:1fr; margin-top:22px;">
+            <div class="panel">
+                <h2 style="margin-bottom:6px;">Activation Fee Waiver</h2>
+                <p class="small">Search for a seller with a pending paid application and waive their ₦3,000 activation fee. You can also restore it if needed.</p>
+
+                <label class="form-label" for="feeWaiverSearch" style="margin-top:18px;">Search seller</label>
+                <div class="search-wrap">
+                    <input class="search-input" id="feeWaiverSearch" type="text"
+                        placeholder="Type a name, email or business name..." autocomplete="off">
+                    <div class="search-results" id="feeWaiverResults"></div>
+                </div>
+
+                <div id="feeWaiverSelected" class="selected-user" style="display:none;">
+                    <strong id="feeWaiverName">-</strong>
+                    <span id="feeWaiverMeta">-</span>
+                </div>
+
+                <div style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="button success" id="waiveFeeBtn" type="button" disabled>Waive Fee</button>
+                    <button class="button danger" id="restoreFeeBtn" type="button" disabled>Restore Fee</button>
+                </div>
+                <div id="feeWaiverMessage" class="message" aria-live="polite"></div>
             </div>
         </div>
 
@@ -385,6 +426,7 @@
 
             document.getElementById('logoutBtn').addEventListener('click', logoutUser);
             setupSearch();
+            setupFeeWaiver();
         }
 
         function renderAdminList(admins) {
@@ -638,6 +680,87 @@
                 .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
+        // --- Fee Waiver ---
+        let selectedApplicationId = null;
+        let feeWaiverTimer = null;
+
+        function setupFeeWaiver() {
+            const input = document.getElementById('feeWaiverSearch');
+            const results = document.getElementById('feeWaiverResults');
+
+            input.addEventListener('input', () => {
+                clearTimeout(feeWaiverTimer);
+                const q = input.value.trim();
+                if (q.length < 2) { results.classList.remove('open'); return; }
+                feeWaiverTimer = setTimeout(() => searchSellersForWaiver(q), 300);
+            });
+
+            input.addEventListener('blur', () => {
+                setTimeout(() => results.classList.remove('open'), 200);
+            });
+
+            document.getElementById('waiveFeeBtn').addEventListener('click', () => toggleFee(true));
+            document.getElementById('restoreFeeBtn').addEventListener('click', () => toggleFee(false));
+        }
+
+        async function searchSellersForWaiver(q) {
+            const results = document.getElementById('feeWaiverResults');
+            try {
+                const res = await fetch(`${API}/api/super-admin/search-sellers?q=${encodeURIComponent(q)}`, {
+                    headers: authHeaders()
+                });
+                const data = await res.json();
+                if (!Array.isArray(data) || !data.length) {
+                    results.innerHTML = '<div class="search-result-item"><span>No pending paid applications found</span></div>';
+                } else {
+                    results.innerHTML = data.map(s => `
+                        <div class="search-result-item" onclick="selectSellerForWaiver(${s.application_id}, '${escHtml(s.fullname)}', '${escHtml(s.email)}', '${escHtml(s.business_name)}', '${escHtml(s.payment_status)}')">
+                            <strong>${escHtml(s.fullname)} — ${escHtml(s.business_name)}</strong>
+                            <span>${escHtml(s.email)} · Fee: ${s.payment_status === 'not_required' ? 'Already waived' : '₦' + Number(s.store_fee_amount).toLocaleString()}</span>
+                        </div>
+                    `).join('');
+                }
+                results.classList.add('open');
+            } catch {
+                results.classList.remove('open');
+            }
+        }
+
+        function selectSellerForWaiver(applicationId, name, email, businessName, paymentStatus) {
+            selectedApplicationId = applicationId;
+            document.getElementById('feeWaiverSearch').value = `${name} — ${businessName}`;
+            document.getElementById('feeWaiverName').textContent = `${name} (${businessName})`;
+            document.getElementById('feeWaiverMeta').textContent = `${email} · Current fee status: ${paymentStatus === 'not_required' ? 'Waived ✅' : 'Required (' + paymentStatus + ')'}`;
+            document.getElementById('feeWaiverSelected').style.display = 'block';
+            document.getElementById('feeWaiverResults').classList.remove('open');
+            document.getElementById('waiveFeeBtn').disabled = false;
+            document.getElementById('restoreFeeBtn').disabled = false;
+        }
+
+        window.selectSellerForWaiver = selectSellerForWaiver;
+
+        async function toggleFee(waive) {
+            if (!selectedApplicationId) return;
+            const msg = document.getElementById('feeWaiverMessage');
+            try {
+                const res = await fetch(`${API}/api/super-admin/waive-fee/${selectedApplicationId}`, {
+                    method: 'PATCH',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ waive })
+                });
+                const data = await res.json();
+                setMessage(msg, data.message, res.ok ? 'success' : 'error');
+                if (res.ok) {
+                    // Refresh the status shown
+                    const newStatus = data.payment_status;
+                    document.getElementById('feeWaiverMeta').textContent =
+                        document.getElementById('feeWaiverMeta').textContent.replace(/Current fee status:.*/, `Current fee status: ${newStatus === 'not_required' ? 'Waived ✅' : 'Required (' + newStatus + ')'}`);
+                }
+            } catch {
+                setMessage(msg, 'Could not update fee status.', 'error');
+            }
+        }
+
         window.savePermissions = savePermissions;
         window.demoteAdmin = demoteAdmin;
         window.selectUser = selectUser;
@@ -652,8 +775,69 @@
                 document.getElementById('bankInstructions').value = data.bank_instructions || '';
                 document.getElementById('withdrawalHoldHours').value = data.withdrawal_hold_hours ?? '24';
                 document.getElementById('minWithdrawalAmount').value = data.min_withdrawal_amount ?? '1000';
+                document.getElementById('sellerTerms').value = data.seller_terms || DEFAULT_TERMS;
             } catch {}
         }
+
+        const DEFAULT_TERMS = `NexoreX Seller Terms and Conditions
+Last updated: June 2025
+
+By submitting a seller application on NexoreX, you agree to the following terms. Please read them carefully before proceeding.
+
+1. Eligibility
+You must be at least 18 years old and legally capable of entering into a binding agreement to register as a seller on NexoreX. By applying, you confirm that all information provided is accurate and truthful.
+
+2. Activation Fee
+A one-time store activation fee of ₦3,000 is required to activate your seller account, unless waived by the platform. This fee is non-refundable once your application has been reviewed and approved.
+
+3. Commission
+NexoreX charges a 5% commission on every completed sale. This amount is automatically deducted before your wallet is credited. By selling on this platform, you agree to this deduction.
+
+4. Product Listings
+All products must be accurately described, legally owned or authorized for sale, and must not violate any applicable laws. NexoreX reserves the right to reject or remove any product listing at its discretion.
+
+5. Prohibited Items
+You may not list counterfeit goods, stolen items, illegal products, or anything that violates Nigerian law or NexoreX platform policies. Violation of this rule will result in immediate account suspension.
+
+6. Order Fulfillment
+As a seller, you are responsible for fulfilling orders promptly and honestly. Failure to deliver goods after payment confirmation may result in penalties, suspension, or permanent removal from the platform.
+
+7. Payouts and Withdrawals
+Earnings are credited to your NexoreX wallet after order completion. Withdrawals are subject to a minimum balance requirement and a hold period set by the platform. NexoreX reserves the right to withhold funds pending investigation of disputes or suspicious activity.
+
+8. Conduct
+You agree to communicate professionally with buyers and platform staff. Harassment, fraud, or any form of misconduct will result in immediate account termination without refund.
+
+9. Account Suspension
+NexoreX reserves the right to suspend or permanently ban any seller account found to be in violation of these terms, without prior notice in cases of serious misconduct.
+
+10. Changes to Terms
+NexoreX may update these terms at any time. Continued use of the platform after changes are published constitutes acceptance of the updated terms.
+
+11. Governing Law
+These terms are governed by the laws of the Federal Republic of Nigeria. Any disputes shall be resolved under Nigerian jurisdiction.`;
+
+        document.getElementById('termsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('termsSaveBtn');
+            const msg = document.getElementById('termsMessage');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+            try {
+                const res = await fetch(`${API}/api/platform-settings`, {
+                    method: 'PUT',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ seller_terms: document.getElementById('sellerTerms').value.trim() })
+                });
+                const data = await res.json();
+                setMessage(msg, data.message, res.ok ? 'success' : 'error');
+            } catch {
+                setMessage(msg, 'Could not save terms.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Terms & Conditions';
+            }
+        });
 
         document.getElementById('bankForm').addEventListener('submit', async (e) => {
             e.preventDefault();

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Posts | NexoreX</title>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #f6efe5 0%, #eef5f3 48%, #e6edf4 100%);
+            --panel: rgba(255,255,255,0.92);
+            --panel-soft: rgba(255,255,255,0.75);
+            --text: #1f2933; --muted: #61707a;
+            --line: rgba(15,23,42,0.1);
+            --brand: #0f766e; --brand-deep: #134e4a;
+            --success: #166534; --danger: #b42318;
+            --shadow: 0 24px 70px rgba(31,41,51,0.12);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { min-height:100vh; font-family:"Trebuchet MS",Verdana,sans-serif; color:var(--text); background:var(--bg); opacity:0; animation:fadeIn 0.45s ease forwards; }
+        @keyframes fadeIn { to { opacity:1; } }
+        @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        .shell { width:min(1100px,calc(100% - 32px)); margin:0 auto; padding:24px 0 48px; }
+        .nav, .panel { background:var(--panel); border:1px solid rgba(255,255,255,0.84); border-radius:28px; box-shadow:var(--shadow); backdrop-filter:blur(10px); animation:slideUp 0.5s ease both; }
+        .nav { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:16px 18px; }
+        .nav-actions { display:flex; gap:10px; flex-wrap:wrap; }
+        .link,.button { font:inherit; text-decoration:none; border-radius:999px; padding:10px 16px; transition:transform 0.18s ease,background 0.18s ease,box-shadow 0.18s ease; }
+        .link { color:var(--text); }
+        .link:hover { background:rgba(31,41,51,0.06); }
+        .button { border:0; cursor:pointer; color:#fff; background:linear-gradient(135deg,var(--brand),var(--brand-deep)); box-shadow:0 10px 24px rgba(15,118,110,0.16); }
+        .button:hover { transform:translateY(-2px); box-shadow:0 16px 32px rgba(15,118,110,0.26); }
+        .button:active { transform:translateY(0); }
+        .grid { display:grid; grid-template-columns:0.9fr 1.1fr; gap:22px; margin-top:22px; }
+        .panel { padding:28px; }
+        form { display:grid; gap:14px; }
+        label { font-size:0.95rem; font-weight:700; }
+        input,textarea,select { width:100%; margin-top:6px; border:1px solid var(--line); border-radius:16px; padding:14px 16px; font:inherit; background:#fff; transition:border-color 0.2s; }
+        input:focus,textarea:focus,select:focus { outline:none; border-color:var(--brand); }
+        textarea { min-height:120px; resize:vertical; }
+        .message { min-height:24px; margin-top:12px; font-size:0.95rem; }
+        .message.error { color:var(--danger); }
+        .message.success { color:var(--success); }
+        .post-list { display:grid; gap:16px; margin-top:18px; }
+        .post-card { padding:18px; border-radius:22px; background:var(--panel-soft); border:1px solid rgba(15,23,42,0.08); transition:transform 0.2s,box-shadow 0.2s; }
+        .post-card:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba(31,41,51,0.09); }
+        .post-card img { width:100%; max-height:200px; object-fit:cover; border-radius:14px; margin-top:10px; }
+        .badge { display:inline-flex; align-items:center; border-radius:999px; padding:5px 12px; font-size:0.82rem; font-weight:700; }
+        .badge.pending { background:rgba(234,179,8,0.12); color:#854d0e; }
+        .badge.approved { background:rgba(22,101,52,0.1); color:var(--success); }
+        .badge.rejected { background:rgba(180,35,24,0.1); color:var(--danger); }
+        .hamburger { display:none; flex-direction:column; gap:5px; background:none; border:none; cursor:pointer; padding:6px; border-radius:10px; transition:background 0.2s; }
+        .hamburger:hover { background:rgba(31,41,51,0.07); }
+        .hamburger span { display:block; width:22px; height:2px; background:var(--text); border-radius:2px; transition:transform 0.3s ease,opacity 0.3s ease; }
+        .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity:0; }
+        .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+        @media (max-width:900px) { .grid { grid-template-columns:1fr; } }
+        @media (max-width:720px) {
+            .nav { flex-wrap:wrap; }
+            .nav-actions { display:none; width:100%; flex-direction:column; align-items:stretch; gap:4px; padding-top:8px; border-top:1px solid var(--line); }
+            .nav-actions.open { display:flex; }
+            .nav-actions a,.nav-actions button { text-align:left; border-radius:14px; padding:12px 14px; }
+            .hamburger { display:flex; }
+            .panel { padding:22px; border-radius:22px; }
+        }
+        @media (max-width:480px) { .shell { width:calc(100% - 24px); } }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <nav class="nav">
+            <div>
+                <strong style="display:block;font-size:1.3rem;letter-spacing:0.05em;text-transform:uppercase;">NexoreX</strong>
+                <span id="navGreeting" style="color:var(--muted);font-size:0.9rem;">My Posts</span>
+            </div>
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu" type="button">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-actions" id="navActions">
+                <a class="link" href="./feed.html">Community Feed</a>
+                <a class="link" href="./seller-dashboard.html">Dashboard</a>
+                <a class="link" href="./seller-products.html">Products</a>
+                <button class="button" id="logoutBtn" type="button">Logout</button>
+            </div>
+        </nav>
+
+        <section class="grid">
+            <article class="panel">
+                <h2 style="margin-bottom:6px;">Create a Post</h2>
+                <p style="color:var(--muted);font-size:0.9rem;margin-bottom:4px;">Share updates, product highlights, or announcements. Posts go live after admin approval.</p>
+                <form id="postForm">
+                    <label>Caption
+                        <textarea id="caption" maxlength="500" placeholder="What do you want to share?" required></textarea>
+                    </label>
+                    <label>Image (optional)
+                        <input id="imageFile" type="file" accept="image/png,image/jpeg,image/webp" style="padding:10px 16px;">
+                        <div style="color:var(--muted);font-size:0.82rem;margin-top:4px;">JPG, PNG or WEBP · max 5MB</div>
+                    </label>
+                    <div id="imagePreviewWrap" style="display:none;">
+                        <img id="imagePreview" src="" alt="Preview" style="width:100%;max-height:200px;object-fit:cover;border-radius:14px;border:1px solid var(--line);">
+                    </div>
+                    <label>Tag a Product (optional)
+                        <select id="productSelect">
+                            <option value="">No product tagged</option>
+                        </select>
+                    </label>
+                    <button class="button" id="submitBtn" type="submit">Submit Post</button>
+                </form>
+                <div id="formMessage" class="message" aria-live="polite"></div>
+            </article>
+
+            <article class="panel">
+                <h2 style="margin-bottom:6px;">Your Posts</h2>
+                <p style="color:var(--muted);font-size:0.9rem;">Posts pending approval are only visible to you and admins.</p>
+                <div id="postList" class="post-list"></div>
+            </article>
+        </section>
+    </main>
+
+    <script src="./app.js"></script>
+    <script>
+        const API = 'http://localhost:5000';
+        const formMessage = document.getElementById('formMessage');
+        const submitBtn = document.getElementById('submitBtn');
+
+        function ensureSeller() {
+            const user = getStoredUser();
+            const token = getStoredToken();
+            if (!user || !token) { window.location.href = './login.html'; return null; }
+            if (user.role !== 'seller' || user.sellerStatus !== 'approved') { window.location.href = './seller-dashboard.html'; return null; }
+            document.getElementById('navGreeting').textContent = `${user.name}'s posts`;
+            return user;
+        }
+
+        function setMessage(text, type) {
+            formMessage.textContent = text;
+            formMessage.className = `message ${type}`;
+        }
+
+        document.getElementById('imageFile').addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('imagePreview').src = e.target.result;
+                document.getElementById('imagePreviewWrap').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        async function loadMyProducts() {
+            const user = getStoredUser();
+            try {
+                const res = await fetch(`${API}/api/products/seller/${user.id}`, { headers: authHeaders() });
+                const data = await res.json();
+                if (!res.ok || !Array.isArray(data)) return;
+                const select = document.getElementById('productSelect');
+                data.filter(p => p.approval_status === 'approved').forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.product_id;
+                    opt.textContent = p.name;
+                    select.appendChild(opt);
+                });
+            } catch {}
+        }
+
+        function renderPosts(posts) {
+            const list = document.getElementById('postList');
+            if (!posts.length) {
+                list.innerHTML = '<div class="post-card"><strong>No posts yet.</strong><div style="color:var(--muted);margin-top:6px;">Create your first post above.</div></div>';
+                return;
+            }
+            list.innerHTML = posts.map(post => `
+                <div class="post-card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+                        <span class="badge ${post.status}">${post.status}</span>
+                        <span style="color:var(--muted);font-size:0.82rem;">${new Date(post.created_at).toLocaleDateString('en-NG',{dateStyle:'medium'})}</span>
+                    </div>
+                    <p style="margin-top:10px;line-height:1.6;">${post.caption}</p>
+                    ${post.product_name ? `<div style="margin-top:8px;font-size:0.88rem;color:var(--brand);">🏷️ Tagged: ${post.product_name}</div>` : ''}
+                    ${post.image_url ? `<img src="${API}${post.image_url}" alt="Post image">` : ''}
+                    ${post.admin_note ? `<div style="margin-top:10px;padding:10px 14px;border-radius:12px;background:rgba(180,35,24,0.06);color:var(--danger);font-size:0.88rem;">Admin note: ${post.admin_note}</div>` : ''}
+                    <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <span style="color:var(--muted);font-size:0.88rem;">❤️ ${post.like_count} likes</span>
+                        <button class="button" type="button" style="background:linear-gradient(135deg,#b42318,#7f1d1d);padding:8px 14px;font-size:0.85rem;" onclick="deletePost(${post.post_id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadMyPosts() {
+            try {
+                const res = await fetch(`${API}/api/posts/my`, { headers: authHeaders() });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message);
+                renderPosts(data);
+            } catch (err) {
+                document.getElementById('postList').innerHTML = `<div class="post-card"><strong>Could not load posts.</strong><div style="color:var(--muted);">${err.message}</div></div>`;
+            }
+        }
+
+        document.getElementById('postForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const caption = document.getElementById('caption').value.trim();
+            const imageFile = document.getElementById('imageFile').files[0];
+            const productId = document.getElementById('productSelect').value;
+
+            if (!caption) { setMessage('Caption is required.', 'error'); return; }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            setMessage('', '');
+
+            try {
+                let imageData = null;
+                let imageName = null;
+
+                if (imageFile) {
+                    imageData = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = e => resolve(e.target.result);
+                        reader.onerror = () => reject(new Error('Could not read image'));
+                        reader.readAsDataURL(imageFile);
+                    });
+                    imageName = imageFile.name;
+                }
+
+                const res = await fetch(`${API}/api/posts`, {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ caption, image_data: imageData, image_name: imageName, product_id: productId || null })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message);
+
+                setMessage(data.message, 'success');
+                document.getElementById('postForm').reset();
+                document.getElementById('imagePreviewWrap').style.display = 'none';
+                loadMyPosts();
+            } catch (err) {
+                setMessage(err.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Post';
+            }
+        });
+
+        async function deletePost(postId) {
+            if (!confirm('Delete this post? This cannot be undone.')) return;
+            try {
+                const res = await fetch(`${API}/api/posts/${postId}`, { method: 'DELETE', headers: authHeaders() });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message);
+                setMessage(data.message, 'success');
+                loadMyPosts();
+            } catch (err) {
+                setMessage(err.message, 'error');
+            }
+        }
+
+        window.deletePost = deletePost;
+        document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+        document.getElementById('hamburger').addEventListener('click', function() {
+            this.classList.toggle('open');
+            document.getElementById('navActions').classList.toggle('open');
+        });
+
+        if (ensureSeller()) {
+            loadMyProducts();
+            loadMyPosts();
+        }
+    </script>
+</body>
+</html>

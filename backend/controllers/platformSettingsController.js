@@ -11,7 +11,7 @@ function queryAsync(sql, params = []) {
     });
 }
 
-const ALLOWED_KEYS = ['bank_name', 'bank_account_name', 'bank_account_number', 'bank_instructions', 'withdrawal_hold_hours', 'min_withdrawal_amount'];
+const ALLOWED_KEYS = ['bank_name', 'bank_account_name', 'bank_account_number', 'bank_instructions', 'withdrawal_hold_hours', 'min_withdrawal_amount', 'seller_terms'];
 
 // GET /api/platform-settings — public, used by checkout and orders pages
 exports.getSettings = async (req, res) => {
