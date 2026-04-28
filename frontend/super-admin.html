@@ -273,6 +273,48 @@
             </div>
         </div>
 
+        <!-- Analytics Dashboard -->
+        <div class="grid" style="grid-template-columns:1fr; margin-top:22px;">
+            <div class="panel">
+                <h2 style="margin-bottom:6px;">Platform Analytics</h2>
+                <p class="small">Overview of platform performance and key metrics.</p>
+                
+                <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 18px;">
+                    <div class="admin-card">
+                        <div class="small" style="color: var(--muted); margin-bottom: 4px;">Total Users</div>
+                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--brand);" id="totalUsers">-</div>
+                    </div>
+                    <div class="admin-card">
+                        <div class="small" style="color: var(--muted); margin-bottom: 4px;">Active Sellers</div>
+                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--success);" id="totalSellers">-</div>
+                    </div>
+                    <div class="admin-card">
+                        <div class="small" style="color: var(--muted); margin-bottom: 4px;">Total Orders</div>
+                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--gold);" id="totalOrders">-</div>
+                    </div>
+                    <div class="admin-card">
+                        <div class="small" style="color: var(--muted); margin-bottom: 4px;">Platform Revenue</div>
+                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--brand);" id="totalRevenue">-</div>
+                    </div>
+                    <div class="admin-card">
+                        <div class="small" style="color: var(--muted); margin-bottom: 4px;">Pending Applications</div>
+                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--danger);" id="pendingApplications">-</div>
+                    </div>
+                    <div class="admin-card">
+                        <div class="small" style="color: var(--muted); margin-bottom: 4px;">Active Products</div>
+                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--success);" id="activeProducts">-</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 24px;">
+                    <h3 style="margin-bottom: 12px;">Recent Orders</h3>
+                    <div id="recentOrders" style="max-height: 300px; overflow-y: auto;">
+                        <div class="small">Loading recent orders...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Seller Terms & Conditions -->
         <div class="grid" style="grid-template-columns:1fr; margin-top:22px;">
             <div class="panel">
@@ -870,6 +912,46 @@ These terms are governed by the laws of the Federal Republic of Nigeria. Any dis
 
         init();
         loadBankDetails();
+        loadAnalytics();
+
+        async function loadAnalytics() {
+            try {
+                const res = await fetch(`${API}/api/super-admin/analytics`, { headers: authHeaders() });
+                if (!res.ok) throw new Error('Failed to load analytics');
+                const data = await res.json();
+                
+                document.getElementById('totalUsers').textContent = data.totalUsers.toLocaleString();
+                document.getElementById('totalSellers').textContent = data.totalSellers.toLocaleString();
+                document.getElementById('totalOrders').textContent = data.totalOrders.toLocaleString();
+                document.getElementById('totalRevenue').textContent = '₦' + data.totalRevenue.toLocaleString();
+                document.getElementById('pendingApplications').textContent = data.pendingApplications.toLocaleString();
+                document.getElementById('activeProducts').textContent = data.activeProducts.toLocaleString();
+                
+                // Display recent orders
+                const ordersContainer = document.getElementById('recentOrders');
+                if (data.recentOrders && data.recentOrders.length > 0) {
+                    ordersContainer.innerHTML = data.recentOrders.map(order => `
+                        <div class="admin-card" style="margin-bottom: 8px; padding: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>Order #${order.order_id}</strong>
+                                    <div class="small">${escHtml(order.buyer_name)} → ${escHtml(order.seller_name)}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: 700;">₦${Number(order.total_amount).toLocaleString()}</div>
+                                    <div class="small">${order.status.replace('_', ' ')}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    ordersContainer.innerHTML = '<div class="small">No recent orders found.</div>';
+                }
+            } catch (error) {
+                console.error('Failed to load analytics:', error);
+                document.getElementById('recentOrders').innerHTML = '<div class="small">Failed to load analytics data.</div>';
+            }
+        }
     </script>
 </body>
 </html>

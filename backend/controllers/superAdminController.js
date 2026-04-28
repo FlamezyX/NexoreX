@@ -366,3 +366,52 @@ exports.searchTeam = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// GET /api/super-admin/analytics — platform analytics for super admin
+exports.getAnalytics = async (req, res) => {
+    try {
+        const [totalUsers, totalSellers, totalOrders, totalRevenue, pendingApplications, activeProducts] = await Promise.all([
+            queryAsync('SELECT COUNT(*) as count FROM users'),
+            queryAsync('SELECT COUNT(*) as count FROM users WHERE role = "seller" AND seller_status = "approved"'),
+            queryAsync('SELECT COUNT(*) as count FROM orders'),
+            queryAsync('SELECT COALESCE(SUM(commission_amount), 0) as total FROM orders WHERE status IN ("delivered", "payment_confirmed")'),
+            queryAsync('SELECT COUNT(*) as count FROM seller_applications WHERE status = "pending"'),
+            queryAsync('SELECT COUNT(*) as count FROM products WHERE approval_status = "approved" AND product_status = "active"')
+        ]);
+
+        const recentOrders = await queryAsync(
+            `SELECT o.order_id, o.total_amount, o.status, o.created_at,
+                    u1.fullname as buyer_name, u2.fullname as seller_name
+             FROM orders o
+             JOIN users u1 ON o.buyer_id = u1.user_id
+             JOIN users u2 ON o.seller_id = u2.user_id
+             ORDER BY o.created_at DESC
+             LIMIT 10`
+        );
+
+        const monthlyRevenue = await queryAsync(
+            `SELECT 
+                DATE_FORMAT(created_at, '%Y-%m') as month,
+                COALESCE(SUM(commission_amount), 0) as revenue
+             FROM orders 
+             WHERE status IN ('delivered', 'payment_confirmed')
+               AND created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+             GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+             ORDER BY month DESC
+             LIMIT 12`
+        );
+
+        res.json({
+            totalUsers: totalUsers[0].count,
+            totalSellers: totalSellers[0].count,
+            totalOrders: totalOrders[0].count,
+            totalRevenue: parseFloat(totalRevenue[0].total || 0),
+            pendingApplications: pendingApplications[0].count,
+            activeProducts: activeProducts[0].count,
+            recentOrders,
+            monthlyRevenue
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

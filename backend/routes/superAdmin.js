@@ -6,7 +6,7 @@ const superAdminController = require('../controllers/superAdminController');
 
 const express = expressModule;
 const { verifyToken, requireSuperAdmin } = authMiddleware;
-const { getAdmins, promoteToSubAdmin, updatePermissions, demoteAdmin, searchUsers, searchTeam, waiveFee, searchSellers } = superAdminController;
+const { getAdmins, promoteToSubAdmin, updatePermissions, demoteAdmin, searchUsers, searchTeam, waiveFee, searchSellers, getAnalytics } = superAdminController;
 
 const router = express.Router();
 
@@ -24,6 +24,7 @@ function verifyCsrf(req, res, next) {
 }
 
 router.get('/admins', verifyToken, requireSuperAdmin, getAdmins);
+router.get('/analytics', verifyToken, requireSuperAdmin, getAnalytics);
 router.get('/search-users', verifyToken, requireSuperAdmin, searchUsers);
 router.get('/search-team', verifyToken, requireSuperAdmin, searchTeam);
 router.post('/promote', verifyCsrf, verifyToken, requireSuperAdmin, promoteToSubAdmin);
