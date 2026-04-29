@@ -7,11 +7,23 @@ const { requireJson, verifyCsrf } = require('../middleware/requestGuards');
 
 const express = expressModule;
 const { verifyToken, requireSuperAdmin } = authMiddleware;
-const { getAdmins, promoteToSubAdmin, updatePermissions, demoteAdmin, searchUsers, searchTeam, waiveFee, searchSellers, getAnalytics } = superAdminController;
+const {
+    getAdmins,
+    getUsersOverview,
+    promoteToSubAdmin,
+    updatePermissions,
+    demoteAdmin,
+    searchUsers,
+    searchTeam,
+    waiveFee,
+    searchSellers,
+    getAnalytics
+} = superAdminController;
 
 const router = express.Router();
 
 router.get('/admins', verifyToken, requireSuperAdmin, getAdmins);
+router.get('/users-overview', verifyToken, requireSuperAdmin, getUsersOverview);
 router.get('/analytics', verifyToken, requireSuperAdmin, getAnalytics);
 router.get('/search-users', verifyToken, requireSuperAdmin, searchUsers);
 router.get('/search-team', verifyToken, requireSuperAdmin, searchTeam);

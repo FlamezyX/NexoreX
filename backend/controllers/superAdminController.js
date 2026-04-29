@@ -56,7 +56,54 @@ exports.getAdmins = async (req, res) => {
     }
 };
 
-// POST /api/super-admin/promote — promote a user to sub-admin
+// GET /api/super-admin/users-overview - grouped user lists for super admin
+exports.getUsersOverview = async (req, res) => {
+    try {
+        const baseSelect = `
+            SELECT
+                u.user_id,
+                u.fullname,
+                u.email,
+                u.phone,
+                u.location,
+                u.account_status,
+                u.seller_status,
+                u.created_at,
+                (
+                    SELECT sa.business_name
+                    FROM seller_applications sa
+                    WHERE sa.user_id = u.user_id
+                    ORDER BY sa.submitted_at DESC
+                    LIMIT 1
+                ) AS business_name
+            FROM users u
+        `;
+
+        const [approvedSellers, pendingSellers, buyers] = await Promise.all([
+            queryAsync(
+                `${baseSelect}
+                 WHERE u.role = 'seller' AND u.seller_status = 'approved'
+                 ORDER BY u.seller_approved_at DESC, u.created_at DESC`
+            ),
+            queryAsync(
+                `${baseSelect}
+                 WHERE u.role = 'seller' AND u.seller_status = 'pending'
+                 ORDER BY u.created_at DESC`
+            ),
+            queryAsync(
+                `${baseSelect}
+                 WHERE u.role = 'buyer'
+                 ORDER BY u.created_at DESC`
+            )
+        ]);
+
+        res.json({ approvedSellers, pendingSellers, buyers });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// POST /api/super-admin/promote - promote a user to sub-admin
 exports.promoteToSubAdmin = async (req, res) => {
     try {
         const superAdminId = req.user.id;

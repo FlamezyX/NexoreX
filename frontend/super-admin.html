@@ -194,6 +194,46 @@
 
         .form-label { font-weight: 700; font-size: 0.95rem; margin-bottom: 8px; display: block; margin-top: 16px; }
 
+        .user-overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            margin-top: 18px;
+        }
+
+        .user-group {
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            background: var(--panel-soft);
+            padding: 18px;
+        }
+
+        .user-group-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .user-list {
+            display: grid;
+            gap: 10px;
+            max-height: 360px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .user-row {
+            padding: 12px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.7);
+            border: 1px solid rgba(15,23,42,0.07);
+        }
+
+        .user-row strong { display: block; font-size: 0.95rem; }
+        .user-row span { display: block; margin-top: 3px; color: var(--muted); font-size: 0.84rem; line-height: 1.45; }
+
         @media (max-width: 780px) {
             .two-col { grid-template-columns: 1fr; }
         }
@@ -311,6 +351,46 @@
                     <div id="recentOrders" style="max-height: 300px; overflow-y: auto;">
                         <div class="small">Loading recent orders...</div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Overview -->
+        <div class="grid" style="grid-template-columns:1fr; margin-top:22px;">
+            <div class="panel">
+                <h2 style="margin-bottom:6px;">Users Overview</h2>
+                <p class="small">Quickly review approved sellers, sellers waiting for approval, and registered buyers.</p>
+                <div id="usersOverviewMessage" class="message" aria-live="polite"></div>
+                <div class="user-overview-grid">
+                    <section class="user-group">
+                        <div class="user-group-head">
+                            <h3>Approved Sellers</h3>
+                            <span class="badge sub" id="approvedSellersCount">0</span>
+                        </div>
+                        <div id="approvedSellersList" class="user-list">
+                            <div class="small">Loading approved sellers...</div>
+                        </div>
+                    </section>
+
+                    <section class="user-group">
+                        <div class="user-group-head">
+                            <h3>Pending Sellers</h3>
+                            <span class="badge super" id="pendingSellersCount">0</span>
+                        </div>
+                        <div id="pendingSellersList" class="user-list">
+                            <div class="small">Loading pending sellers...</div>
+                        </div>
+                    </section>
+
+                    <section class="user-group">
+                        <div class="user-group-head">
+                            <h3>Registered Buyers</h3>
+                            <span class="badge sub" id="buyersCount">0</span>
+                        </div>
+                        <div id="buyersList" class="user-list">
+                            <div class="small">Loading buyers...</div>
+                        </div>
+                    </section>
                 </div>
             </div>
         </div>
@@ -568,6 +648,52 @@
             } catch {}
         }
 
+        function renderUserRows(users, emptyText) {
+            if (!Array.isArray(users) || !users.length) {
+                return `<div class="small">${emptyText}</div>`;
+            }
+
+            return users.map((user) => {
+                const business = user.business_name ? `Business: ${escHtml(user.business_name)}` : '';
+                const location = user.location ? `Location: ${escHtml(user.location)}` : '';
+                const joined = user.created_at ? `Joined: ${formatDateShort(user.created_at)}` : '';
+                const meta = [escHtml(user.email), business, location, joined].filter(Boolean).join(' | ');
+
+                return `
+                    <div class="user-row">
+                        <strong>${escHtml(user.fullname)}</strong>
+                        <span>${meta}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function loadUsersOverview() {
+            const message = document.getElementById('usersOverviewMessage');
+            try {
+                const res = await fetch(`${API}/api/super-admin/users-overview`, { headers: authHeaders() });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Could not load users overview');
+
+                const approvedSellers = data.approvedSellers || [];
+                const pendingSellers = data.pendingSellers || [];
+                const buyers = data.buyers || [];
+
+                document.getElementById('approvedSellersCount').textContent = approvedSellers.length;
+                document.getElementById('pendingSellersCount').textContent = pendingSellers.length;
+                document.getElementById('buyersCount').textContent = buyers.length;
+                document.getElementById('approvedSellersList').innerHTML = renderUserRows(approvedSellers, 'No approved sellers yet.');
+                document.getElementById('pendingSellersList').innerHTML = renderUserRows(pendingSellers, 'No pending sellers right now.');
+                document.getElementById('buyersList').innerHTML = renderUserRows(buyers, 'No registered buyers yet.');
+                setMessage(message, '', '');
+            } catch (error) {
+                setMessage(message, error.message, 'error');
+                document.getElementById('approvedSellersList').innerHTML = '<div class="small">Could not load approved sellers.</div>';
+                document.getElementById('pendingSellersList').innerHTML = '<div class="small">Could not load pending sellers.</div>';
+                document.getElementById('buyersList').innerHTML = '<div class="small">Could not load buyers.</div>';
+            }
+        }
+
         function setupSearch() {
             const input = document.getElementById('userSearch');
             const results = document.getElementById('searchResults');
@@ -707,6 +833,7 @@
                     document.querySelectorAll('#promotePermGrid input').forEach(i => i.checked = false);
                     promoteBtn.disabled = true;
                     loadAdmins();
+                    loadUsersOverview();
                 }
             } catch {
                 setMessage(promoteMessage, 'Could not promote user.', 'error');
@@ -913,6 +1040,7 @@ These terms are governed by the laws of the Federal Republic of Nigeria. Any dis
         init();
         loadBankDetails();
         loadAnalytics();
+        loadUsersOverview();
 
         async function loadAnalytics() {
             try {
