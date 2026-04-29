@@ -262,8 +262,8 @@ exports.applySeller = (req, res) => {
                                     if (updateErr) return res.status(500).json(updateErr);
                                     res.status(201).json({
                                         message: applicationType === 'paid'
-                                            ? 'Seller application submitted with store activation payment details'
-                                            : 'Promo seller application submitted successfully'
+                                            ? 'Your seller application has been submitted and is now under review by our admin team. You will be notified once a decision has been made.'
+                                            : 'Your promo seller application has been submitted and is now under review by our admin team. You will be notified once a decision has been made.'
                                     });
                                 }
                             );
