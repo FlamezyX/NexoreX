@@ -89,12 +89,23 @@ exports.addProduct = (req, res) => {
     );
 };
 
+exports.getCategories = (req, res) => {
+    db.query(
+        `SELECT category_id, name, slug FROM categories WHERE is_active = 1 ORDER BY name ASC`,
+        (err, results) => {
+            if (err) return res.status(500).json(err);
+            res.json(results);
+        }
+    );
+};
+
 exports.getProducts = (req, res) => {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(20, Math.max(1, parseInt(req.query.limit) || 12));
     const offset = (page - 1) * limit;
     const search = req.query.search?.trim() || '';
     const searchParam = search ? `%${search}%` : null;
+    const categoryId = req.query.category_id ? parseInt(req.query.category_id) : null;
 
     const whereClauses = [`p.approval_status = 'approved'`, `p.product_status = 'active'`];
     const params = [];
@@ -102,6 +113,11 @@ exports.getProducts = (req, res) => {
     if (searchParam) {
         whereClauses.push(`(p.product_name LIKE ? OR p.description LIKE ? OR u.fullname LIKE ?)`);
         params.push(searchParam, searchParam, searchParam);
+    }
+
+    if (categoryId) {
+        whereClauses.push(`p.category_id = ?`);
+        params.push(categoryId);
     }
 
     const where = `WHERE ${whereClauses.join(' AND ')}`;

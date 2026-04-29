@@ -1,0 +1,341 @@
+/* ============================================================
+   NexoreX — Futuristic Professional Theme
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+    /* Core palette */
+    --bg-base:        #080c14;
+    --bg-mid:         #0d1220;
+    --bg-top:         #111827;
+    --panel:          rgba(15, 22, 38, 0.85);
+    --panel-soft:     rgba(15, 22, 38, 0.55);
+    --surface:        rgba(20, 30, 52, 0.7);
+
+    /* Brand */
+    --brand:          #00d4ff;
+    --brand-deep:     #0077aa;
+    --brand-glow:     rgba(0, 212, 255, 0.18);
+    --accent:         #7c3aed;
+    --accent-glow:    rgba(124, 58, 237, 0.18);
+
+    /* Text */
+    --text:           #e8edf5;
+    --muted:          #7a8ba0;
+    --heading:        #ffffff;
+
+    /* UI */
+    --line:           rgba(0, 212, 255, 0.12);
+    --line-soft:      rgba(255, 255, 255, 0.06);
+    --danger:         #f87171;
+    --success:        #34d399;
+    --warning:        #fbbf24;
+
+    /* Effects */
+    --shadow:         0 24px 70px rgba(0, 0, 0, 0.5);
+    --shadow-glow:    0 0 40px rgba(0, 212, 255, 0.08);
+    --radius-lg:      24px;
+    --radius-md:      16px;
+    --radius-sm:      10px;
+    --radius-pill:    999px;
+}
+
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Space Grotesk', 'Trebuchet MS', Verdana, sans-serif;
+    background-color: var(--bg-base);
+    background-image:
+        radial-gradient(ellipse at 10% 0%, rgba(0, 212, 255, 0.07) 0%, transparent 50%),
+        radial-gradient(ellipse at 90% 100%, rgba(124, 58, 237, 0.07) 0%, transparent 50%),
+        linear-gradient(180deg, var(--bg-base) 0%, var(--bg-mid) 50%, var(--bg-top) 100%);
+    background-attachment: fixed;
+    color: var(--text);
+    min-height: 100vh;
+}
+
+/* ── Typography ── */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--heading);
+    letter-spacing: -0.02em;
+}
+
+a { color: var(--brand); text-decoration: none; transition: color 0.2s; }
+a:hover { color: #fff; }
+
+/* ── Panels / Cards ── */
+.panel,
+.card,
+.hero-copy,
+.hero-panel,
+.section-card,
+.review-dialog {
+    background: var(--panel) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow), var(--shadow-glow) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+}
+
+/* ── Nav ── */
+.nav {
+    background: rgba(8, 12, 20, 0.9) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 212, 255, 0.06) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+/* ── Brand name ── */
+.brand strong,
+.nav strong {
+    font-family: 'Space Mono', monospace !important;
+    letter-spacing: 0.12em !important;
+    background: linear-gradient(90deg, var(--brand), #a78bfa) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+.brand span,
+.nav .small,
+#navGreeting {
+    color: var(--muted) !important;
+    font-size: 0.85rem !important;
+}
+
+/* ── Links ── */
+.link {
+    color: var(--muted) !important;
+    border-radius: var(--radius-pill) !important;
+    transition: background 0.2s, color 0.2s !important;
+}
+.link:hover {
+    background: rgba(0, 212, 255, 0.08) !important;
+    color: var(--brand) !important;
+}
+
+/* ── Buttons ── */
+.button {
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-weight: 700 !important;
+    border: 0 !important;
+    border-radius: var(--radius-pill) !important;
+    cursor: pointer !important;
+    color: #fff !important;
+    background: linear-gradient(135deg, var(--brand-deep) 0%, var(--brand) 100%) !important;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.25), 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease !important;
+    letter-spacing: 0.02em !important;
+}
+.button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.4), 0 8px 25px rgba(0, 0, 0, 0.4) !important;
+}
+.button:active { transform: translateY(0) !important; }
+.button:disabled { opacity: 0.5 !important; cursor: wait !important; }
+
+.button.ghost,
+.ghost {
+    background: transparent !important;
+    border: 1px solid var(--line) !important;
+    color: var(--text) !important;
+    box-shadow: none !important;
+}
+.button.ghost:hover,
+.ghost:hover {
+    border-color: var(--brand) !important;
+    color: var(--brand) !important;
+    box-shadow: 0 0 16px rgba(0, 212, 255, 0.15) !important;
+}
+
+/* ── Inputs / Textareas / Selects ── */
+input:not([type="radio"]):not([type="checkbox"]):not([type="file"]),
+textarea,
+select {
+    background: rgba(8, 12, 20, 0.7) !important;
+    border: 1px solid rgba(0, 212, 255, 0.15) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--text) !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+input:not([type="radio"]):not([type="checkbox"]):not([type="file"])::placeholder,
+textarea::placeholder { color: var(--muted) !important; }
+
+input:not([type="radio"]):not([type="checkbox"]):not([type="file"]):focus,
+textarea:focus,
+select:focus {
+    outline: none !important;
+    border-color: var(--brand) !important;
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.12) !important;
+}
+
+select option { background: var(--bg-top) !important; color: var(--text) !important; }
+
+/* ── Labels ── */
+label { color: var(--text) !important; }
+
+/* ── Stats / List items / Notes / Path cards ── */
+.stat,
+.list-item,
+.note,
+.path-card,
+.cart-item,
+.feed-card,
+.review-item,
+.order-card,
+.product-card {
+    background: var(--surface) !important;
+    border: 1px solid var(--line-soft) !important;
+    border-radius: var(--radius-md) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+
+.stat:hover,
+.list-item:hover,
+.feed-card:hover,
+.product-card:hover {
+    border-color: rgba(0, 212, 255, 0.2) !important;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.06) !important;
+}
+
+.stat strong { color: var(--brand) !important; }
+
+/* ── Product cards ── */
+.product-card {
+    overflow: hidden !important;
+}
+.product-card img {
+    background: var(--bg-top) !important;
+    filter: brightness(0.95) !important;
+}
+.product-name { color: var(--heading) !important; }
+.price { color: var(--brand) !important; }
+.product-desc { color: var(--muted) !important; }
+.rating-row { color: #a78bfa !important; }
+
+/* ── Pills / Eyebrow / Status ── */
+.pill {
+    background: rgba(0, 212, 255, 0.1) !important;
+    color: var(--brand) !important;
+    border: 1px solid rgba(0, 212, 255, 0.2) !important;
+}
+
+.eyebrow { color: var(--brand) !important; }
+
+.status, .muted, .small, .subcopy, .status-copy {
+    color: var(--muted) !important;
+}
+
+/* ── Notice block ── */
+.notice {
+    background: rgba(0, 212, 255, 0.06) !important;
+    border: 1px solid rgba(0, 212, 255, 0.14) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--muted) !important;
+}
+
+/* ── Messages ── */
+.message.error  { color: var(--danger) !important; }
+.message.success { color: var(--success) !important; }
+
+/* ── Hamburger ── */
+.hamburger span { background: var(--text) !important; }
+.hamburger:hover { background: rgba(0, 212, 255, 0.08) !important; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: rgba(0, 212, 255, 0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0, 212, 255, 0.4); }
+
+/* ── Role option cards (register) ── */
+.role-option {
+    background: var(--surface) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--text) !important;
+    transition: border-color 0.2s !important;
+}
+.role-option:has(input:checked) {
+    border-color: var(--brand) !important;
+    background: rgba(0, 212, 255, 0.06) !important;
+}
+
+/* ── Empty states ── */
+.empty-state,
+.empty {
+    background: linear-gradient(135deg, rgba(15, 22, 38, 0.8), rgba(20, 14, 40, 0.8)) !important;
+    border: 1px dashed rgba(0, 212, 255, 0.15) !important;
+    border-radius: var(--radius-lg) !important;
+    color: var(--muted) !important;
+}
+.empty-state h3 { color: var(--heading) !important; }
+
+/* ── Review panel overlay ── */
+.review-panel { background: rgba(0, 0, 0, 0.7) !important; }
+
+/* ── Pagination buttons ── */
+#pagination .button { font-size: 0.88rem !important; padding: 8px 14px !important; }
+
+/* ── Category filter chips ── */
+#categoryFilters button {
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-size: 0.85rem !important;
+    border-radius: var(--radius-pill) !important;
+    transition: all 0.2s ease !important;
+}
+
+/* ── Headline / hero text ── */
+.headline, h1 {
+    color: var(--heading) !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+}
+
+/* ── Subtle grid overlay on body ── */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(0, 212, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.shell, main, header, footer { position: relative; z-index: 1; }
+
+/* ── Qty input in cart ── */
+.qty-input {
+    background: rgba(8, 12, 20, 0.7) !important;
+    border: 1px solid rgba(0, 212, 255, 0.15) !important;
+    color: var(--text) !important;
+    border-radius: var(--radius-sm) !important;
+}
+
+/* ── Summary lines in cart/checkout ── */
+.summary-line { color: var(--muted) !important; border-bottom: 1px solid var(--line-soft) !important; padding-bottom: 8px !important; }
+.summary-line strong { color: var(--text) !important; }
+
+/* ── Meta row on product cards ── */
+.meta { border-top: 1px solid var(--line-soft) !important; color: var(--muted) !important; }
+
+/* ── Feed meta ── */
+.feed-meta { color: #a78bfa !important; }
+
+/* ── Terms box ── */
+#termsBox {
+    background: rgba(8, 12, 20, 0.8) !important;
+    border: 1px solid rgba(0, 212, 255, 0.12) !important;
+    color: var(--muted) !important;
+    border-radius: var(--radius-md) !important;
+}

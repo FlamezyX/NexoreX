@@ -6,6 +6,7 @@ const { requireJson, verifyCsrf } = require('../middleware/requestGuards');
 const {
     addProduct,
     getProducts,
+    getCategories,
     getSellerProducts,
     getSellerProfile,
     uploadProductImage
@@ -15,6 +16,7 @@ const router = express.Router();
 
 router.post('/upload-image', requireJson, verifyCsrf, verifyToken, requireRole('seller'), uploadProductImage);
 router.post('/add', requireJson, verifyCsrf, verifyToken, requireRole('seller'), addProduct);
+router.get('/categories', getCategories);
 router.get('/', getProducts);
 router.get('/seller-profile/:sellerId', getSellerProfile);
 router.get('/seller/:sellerId', verifyToken, requireRole('seller', 'admin'), getSellerProducts);

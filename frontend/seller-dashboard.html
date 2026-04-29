@@ -232,6 +232,7 @@
             .shell { width: calc(100% - 24px); }
         }
     </style>
+        <link rel="stylesheet" href="./theme.css">
 </head>
 <body>
     <main class="shell">
@@ -432,14 +433,18 @@
         }
 
         async function loadSellerTerms() {
+            const termsBox = document.getElementById('termsBox');
+            const termsBlock = document.getElementById('termsBlock');
+            const fallback = 'By submitting this seller application, you agree to comply with NexoreX platform rules, maintain accurate product listings, fulfil orders in a timely manner, and accept the 5% commission deducted on every completed sale. NexoreX reserves the right to suspend or remove any seller account that violates platform policies.';
             try {
                 const res = await fetch(apiUrl('/api/platform-settings'));
                 const data = await res.json();
-                if (data.seller_terms) {
-                    document.getElementById('termsBox').textContent = data.seller_terms;
-                    document.getElementById('termsBlock').style.display = 'block';
-                }
-            } catch {}
+                termsBox.textContent = data.seller_terms?.trim() || fallback;
+            } catch {
+                termsBox.textContent = fallback;
+            } finally {
+                termsBlock.style.display = 'block';
+            }
         }
 
         async function loadPromoSettings() {

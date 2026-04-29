@@ -463,6 +463,7 @@
             .product-card img { height: 180px; }
         }
     </style>
+        <link rel="stylesheet" href="./theme.css">
 </head>
 <body>
     <header class="shell">
@@ -535,7 +536,7 @@
                     <div id="feedStatus" class="status">Loading products...</div>
                 </div>
             </div>
-            <div id="productList" class="product-grid"></div>
+            <div id="categoryFilters" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;"></div>`n            <div id="productList" class="product-grid"></div>
             <div id="pagination" style="display:flex; justify-content:center; gap:10px; margin-top:24px; flex-wrap:wrap;"></div>
         </section>
     </main>
@@ -720,9 +721,7 @@
 
         window.openReviews = openReviews;
 
-        let currentPage = 1;
-        let currentSearch = '';
-        let searchTimer = null;
+        let currentPage = 1;`n        let currentSearch = '';`n        let currentCategory = null;`n        let searchTimer = null;`n`n        async function loadCategories() {`n            try {`n                const res = await fetch(``${API_BASE_URL}/api/products/categories``);`n                const cats = await res.json();`n                if (!res.ok || !Array.isArray(cats) || !cats.length) return;`n                const container = document.getElementById('categoryFilters');`n                container.innerHTML = [{ category_id: null, name: 'All' }, ...cats].map((c) =>`n                    ``<button type="button" onclick="filterByCategory(${c.category_id})" id="cat-${c.category_id}" style="border:1px solid var(--line); border-radius:999px; padding:8px 16px; font:inherit; font-size:0.88rem; cursor:pointer; background:${c.category_id === null ? 'var(--brand)' : 'rgba(255,255,255,0.8)'}; color:${c.category_id === null ? '#fff' : 'var(--text)'}; transition:background 0.2s,color 0.2s;">${c.name}</button>``).join('');`n            } catch {}`n        }`n`n        function filterByCategory(categoryId) {`n            currentCategory = categoryId;`n            currentPage = 1;`n            document.querySelectorAll('#categoryFilters button').forEach((btn) => {`n                const active = btn.id === ``cat-${categoryId}``;`n                btn.style.background = active ? 'var(--brand)' : 'rgba(255,255,255,0.8)';`n                btn.style.color = active ? '#fff' : 'var(--text)';`n            });`n            loadProducts();`n        }`n        window.filterByCategory = filterByCategory;
 
         function renderPagination(page, totalPages) {
             const pag = document.getElementById('pagination');
@@ -747,7 +746,7 @@
             feedStatus.textContent = 'Loading...';
             try {
                 const params = new URLSearchParams({ page: currentPage, limit: 12 });
-                if (currentSearch) params.set('search', currentSearch);
+                if (currentSearch) params.set('search', currentSearch);`n                if (currentCategory) params.set('category_id', currentCategory);
                 const response = await fetch(`${API_BASE_URL}/api/products?${params}`);
                 const data = await response.json();
 
