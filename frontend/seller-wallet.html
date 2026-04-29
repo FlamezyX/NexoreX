@@ -203,7 +203,7 @@
 
         async function loadWallet() {
             try {
-                const response = await fetch('https://nexorex.onrender.com/api/wallet/me', {
+                const response = await fetch(apiUrl('/api/wallet/me'), {
                     headers: authHeaders()
                 });
                 const data = await response.json();
@@ -211,7 +211,7 @@
                 renderWallet(data);
 
                 // Fetch hold period setting and show notice
-                const settingsRes = await fetch('https://nexorex.onrender.com/api/platform-settings');
+                const settingsRes = await fetch(apiUrl('/api/platform-settings'));
                 const settings = await settingsRes.json();
                 const holdHours = Number(settings.withdrawal_hold_hours || 24);
                 const holdNotice = document.getElementById('holdNotice');
@@ -230,7 +230,7 @@
             withdrawalBtn.textContent = 'Submitting...';
 
             try {
-                const response = await fetch('https://nexorex.onrender.com/api/wallet/withdrawals', {
+                const response = await fetch(apiUrl('/api/wallet/withdrawals'), {
                     method: 'POST',
                     headers: authHeaders(),
                     body: JSON.stringify({

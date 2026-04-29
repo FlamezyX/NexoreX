@@ -10,6 +10,12 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+function getFrontendUrl(path = '') {
+    const baseUrl = (process.env.FRONTEND_URL || 'http://localhost:5500').replace(/\/+$/, '');
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    return `${baseUrl}${normalizedPath}`;
+}
+
 async function sendMail({ to, subject, html }) {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
         console.warn('[Email] EMAIL_USER or EMAIL_PASS not set — skipping email to', to);
@@ -54,7 +60,7 @@ function welcomeSellerEmail(name) {
                 <p style="color:#61707a;line-height:1.7;margin:0 0 24px;">
                     If you have any questions, you can reach us directly through the messaging system on the platform.
                 </p>
-                <a href="http://localhost:5000" style="display:inline-block;background:linear-gradient(135deg,#c05621,#7c2d12);color:#fff;text-decoration:none;padding:14px 28px;border-radius:999px;font-weight:700;">
+                <a href="${getFrontendUrl('/seller-dashboard.html')}" style="display:inline-block;background:linear-gradient(135deg,#c05621,#7c2d12);color:#fff;text-decoration:none;padding:14px 28px;border-radius:999px;font-weight:700;">
                     Go to Your Dashboard
                 </a>
             </div>
@@ -104,7 +110,7 @@ function welcomeSubAdminEmail(name, permissions) {
                 <p style="color:#61707a;line-height:1.7;margin:0 0 24px;">
                     Log in with your existing account credentials to access the admin dashboard. Your permissions can be updated at any time by the super admin.
                 </p>
-                <a href="http://localhost:5000/admin-dashboard.html" style="display:inline-block;background:linear-gradient(135deg,#1d4ed8,#1e3a8a);color:#fff;text-decoration:none;padding:14px 28px;border-radius:999px;font-weight:700;">
+                <a href="${getFrontendUrl('/admin-dashboard.html')}" style="display:inline-block;background:linear-gradient(135deg,#1d4ed8,#1e3a8a);color:#fff;text-decoration:none;padding:14px 28px;border-radius:999px;font-weight:700;">
                     Go to Admin Dashboard
                 </a>
             </div>

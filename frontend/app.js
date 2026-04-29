@@ -1,3 +1,14 @@
+const API_BASE_URL = (
+    window.NEXOREX_API_BASE_URL ||
+    localStorage.getItem('nexorexApiBaseUrl') ||
+    'https://nexorex.onrender.com'
+).replace(/\/+$/, '');
+
+function apiUrl(path = '') {
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    return `${API_BASE_URL}${normalizedPath}`;
+}
+
 function getStoredUser() {
     try {
         return JSON.parse(localStorage.getItem('nexorexUser'));

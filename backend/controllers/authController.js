@@ -316,7 +316,7 @@ exports.forgotPassword = async (req, res) => {
     if (!email) return res.status(400).json({ message: 'Email is required' });
     try {
         const users = await queryAsync('SELECT user_id FROM users WHERE email = ?', [email]);
-        if (!users.length) return res.json({ message: 'If that email exists, a reset link has been sent.', dev_token: null });
+        if (!users.length) return res.json({ message: 'If that email exists, a reset link has been sent.' });
 
         const token = crypto.randomBytes(32).toString('hex');
         const expires = new Date(Date.now() + 60 * 60 * 1000);
@@ -328,8 +328,11 @@ exports.forgotPassword = async (req, res) => {
             [users[0].user_id, token, expires]
         );
 
-        console.log(`[Password Reset] Link for ${email}: http://localhost:5173/reset-password.html?token=${token}`);
-        res.json({ message: 'If that email exists, a reset link has been sent.', dev_token: token });
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`[Password Reset] Link for ${email}: ${process.env.FRONTEND_URL || 'http://localhost:5500'}/reset-password.html?token=${token}`);
+        }
+
+        res.json({ message: 'If that email exists, a reset link has been sent.' });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

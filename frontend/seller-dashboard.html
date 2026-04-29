@@ -433,7 +433,7 @@
 
         async function loadSellerTerms() {
             try {
-                const res = await fetch('https://nexorex.onrender.com/api/platform-settings');
+                const res = await fetch(apiUrl('/api/platform-settings'));
                 const data = await res.json();
                 if (data.seller_terms) {
                     document.getElementById('termsBox').textContent = data.seller_terms;
@@ -444,7 +444,7 @@
 
         async function loadPromoSettings() {
             try {
-                const response = await fetch('https://nexorex.onrender.com/api/auth/promo-settings');
+                const response = await fetch(apiUrl('/api/auth/promo-settings'));
                 const data = await response.json();
 
                 if (!response.ok) {
@@ -595,7 +595,7 @@
                     payment_proof_name = paymentProofFile.name;
                 }
 
-                const response = await fetch('https://nexorex.onrender.com/api/auth/seller-application', {
+                const response = await fetch(apiUrl('/api/auth/seller-application'), {
                     method: 'POST',
                     headers: authHeaders(),
                     body: JSON.stringify({

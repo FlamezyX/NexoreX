@@ -496,7 +496,7 @@
                 return '';
             }
 
-            return value.startsWith('http') ? value : `https://nexorex.onrender.com${value}`;
+            return value.startsWith('http') ? value : `${API_BASE_URL}${value}`;
         }
 
         function parsePromoAnswers(rawValue) {
@@ -890,7 +890,7 @@
         async function loadApplications() {
             const user = getStoredUser();
             try {
-                const response = await fetch('https://nexorex.onrender.com/api/admin/applications', {
+                const response = await fetch(apiUrl('/api/admin/applications'), {
                     headers: authHeaders()
                 });
                 const data = await response.json();
@@ -911,7 +911,7 @@
         async function loadProducts() {
             const user = getStoredUser();
             try {
-                const response = await fetch('https://nexorex.onrender.com/api/admin/products', {
+                const response = await fetch(apiUrl('/api/admin/products'), {
                     headers: authHeaders()
                 });
                 const data = await response.json();
@@ -931,7 +931,7 @@
 
         async function loadOrders() {
             try {
-                const response = await fetch('https://nexorex.onrender.com/api/orders/my', {
+                const response = await fetch(apiUrl('/api/orders/my'), {
                     headers: authHeaders()
                 });
                 const data = await response.json();
@@ -951,7 +951,7 @@
 
         async function loadShippingOptions() {
             try {
-                const response = await fetch('https://nexorex.onrender.com/api/shipping-options/admin', {
+                const response = await fetch(apiUrl('/api/shipping-options/admin'), {
                     headers: authHeaders()
                 });
                 const data = await response.json();
@@ -973,7 +973,7 @@
 
         async function loadWithdrawals() {
             try {
-                const response = await fetch('https://nexorex.onrender.com/api/admin/withdrawals', {
+                const response = await fetch(apiUrl('/api/admin/withdrawals'), {
                     headers: authHeaders()
                 });
                 const data = await response.json();
@@ -995,7 +995,7 @@
 
         async function loadAnalytics() {
             try {
-                const response = await fetch('https://nexorex.onrender.com/api/admin/analytics', {
+                const response = await fetch(apiUrl('/api/admin/analytics'), {
                     headers: authHeaders()
                 });
                 const data = await response.json();
@@ -1018,7 +1018,7 @@
 
         async function loadReviews() {
             try {
-                const response = await fetch('https://nexorex.onrender.com/api/reviews/moderation', {
+                const response = await fetch(apiUrl('/api/reviews/moderation'), {
                     headers: authHeaders()
                 });
                 const data = await response.json();
@@ -1040,7 +1040,7 @@
 
         async function loadPromoSettings() {
             try {
-                const response = await fetch('https://nexorex.onrender.com/api/admin/promo-settings', {
+                const response = await fetch(apiUrl('/api/admin/promo-settings'), {
                     headers: authHeaders()
                 });
                 const data = await response.json();
@@ -1062,7 +1062,7 @@
 
         async function loadPromoLogs() {
             try {
-                const response = await fetch('https://nexorex.onrender.com/api/admin/promo-logs', {
+                const response = await fetch(apiUrl('/api/admin/promo-logs'), {
                     headers: authHeaders()
                 });
                 const data = await response.json();
@@ -1087,7 +1087,7 @@
             const note = document.getElementById(`note-${applicationId}`)?.value || '';
 
             try {
-                const response = await fetch(`https://nexorex.onrender.com/api/admin/applications/${applicationId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/admin/applications/${applicationId}`, {
                     method: 'PATCH',
                     headers: authHeaders(),
                     body: JSON.stringify({
@@ -1110,7 +1110,7 @@
             const note = document.getElementById(`note-${applicationId}`)?.value || '';
 
             try {
-                const response = await fetch(`https://nexorex.onrender.com/api/admin/applications/${applicationId}/payment`, {
+                const response = await fetch(`${API_BASE_URL}/api/admin/applications/${applicationId}/payment`, {
                     method: 'PATCH',
                     headers: authHeaders(),
                     body: JSON.stringify({
@@ -1134,7 +1134,7 @@
             const note = document.getElementById(`product-note-${productId}`)?.value || '';
 
             try {
-                const response = await fetch(`https://nexorex.onrender.com/api/admin/products/${productId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/admin/products/${productId}`, {
                     method: 'PATCH',
                     headers: authHeaders(),
                     body: JSON.stringify({
@@ -1155,7 +1155,7 @@
 
         async function confirmPayment(orderId) {
             try {
-                const response = await fetch(`https://nexorex.onrender.com/api/orders/${orderId}/confirm-payment`, {
+                const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/confirm-payment`, {
                     method: 'PATCH',
                     headers: authHeaders()
                 });
@@ -1177,7 +1177,7 @@
             shippingSubmitBtn.textContent = 'Saving...';
 
             try {
-                const response = await fetch('https://nexorex.onrender.com/api/shipping-options', {
+                const response = await fetch(apiUrl('/api/shipping-options'), {
                     method: 'POST',
                     headers: authHeaders(),
                     body: JSON.stringify({
@@ -1208,7 +1208,7 @@
 
         async function updateShipping(optionId) {
             try {
-                const response = await fetch(`https://nexorex.onrender.com/api/shipping-options/${optionId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/shipping-options/${optionId}`, {
                     method: 'PATCH',
                     headers: authHeaders(),
                     body: JSON.stringify({
@@ -1236,7 +1236,7 @@
             const note = document.getElementById(`withdrawal-note-${requestId}`)?.value || '';
 
             try {
-                const response = await fetch(`https://nexorex.onrender.com/api/admin/withdrawals/${requestId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/admin/withdrawals/${requestId}`, {
                     method: 'PATCH',
                     headers: authHeaders(),
                     body: JSON.stringify({
@@ -1261,7 +1261,7 @@
             const note = document.getElementById(`review-note-${reviewId}`)?.value || '';
 
             try {
-                const response = await fetch(`https://nexorex.onrender.com/api/reviews/${reviewId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/reviews/${reviewId}`, {
                     method: 'PATCH',
                     headers: authHeaders(),
                     body: JSON.stringify({
@@ -1288,7 +1288,7 @@
             promoSubmitBtn.textContent = 'Saving...';
 
             try {
-                const response = await fetch('https://nexorex.onrender.com/api/admin/promo-settings', {
+                const response = await fetch(apiUrl('/api/admin/promo-settings'), {
                     method: 'PUT',
                     headers: authHeaders(),
                     body: JSON.stringify({
@@ -1310,6 +1310,7 @@
 
                 setMessage(promoMessage, data.message, 'success');
                 loadPromoSettings();
+                loadPromoLogs();
             } catch (error) {
                 setMessage(promoMessage, error.message, 'error');
             } finally {
@@ -1381,8 +1382,8 @@
             reportsEl.innerHTML = '<div class="product-card"><strong>Loading reports...</strong></div>';
             try {
                 const url = status
-                    ? `https://nexorex.onrender.com/api/reports?status=${status}`
-                    : 'https://nexorex.onrender.com/api/reports';
+                    ? `${API_BASE_URL}/api/reports?status=${status}`
+                    : apiUrl('/api/reports');
                 const response = await fetch(url, { headers: authHeaders() });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.message || 'Could not load reports');
@@ -1400,7 +1401,7 @@
         async function reviewReport(reportId, status) {
             const note = document.getElementById(`report-note-${reportId}`)?.value || '';
             try {
-                const response = await fetch(`https://nexorex.onrender.com/api/reports/${reportId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/reports/${reportId}`, {
                     method: 'PATCH',
                     headers: authHeaders(),
                     body: JSON.stringify({ status, admin_note: note })
@@ -1436,7 +1437,7 @@
                     </div>
                     <p class="small" style="margin:12px 0 0; white-space:pre-wrap;">${post.caption}</p>
                     ${post.product_name ? `<div class="small" style="margin-top:8px;">🏷️ Tagged: ${post.product_name}</div>` : ''}
-                    ${post.image_url ? `<img src="https://nexorex.onrender.com${post.image_url}" alt="Post image" style="width:100%;max-height:200px;object-fit:cover;border-radius:14px;margin-top:10px;">` : ''}
+                    ${post.image_url ? `<img src="${API_BASE_URL}${post.image_url}" alt="Post image" style="width:100%;max-height:200px;object-fit:cover;border-radius:14px;margin-top:10px;">` : ''}
                     <textarea id="post-note-${post.post_id}" placeholder="Admin note (optional, shown to seller on rejection)">${post.admin_note || ''}</textarea>
                     <div class="card-actions" style="margin-top:12px;">
                         <span class="small">❤️ ${post.like_count} likes</span>
@@ -1453,7 +1454,7 @@
             const postsEl = document.getElementById('postsEl');
             postsEl.innerHTML = '<div class="product-card"><strong>Loading posts...</strong></div>';
             try {
-                const response = await fetch(`https://nexorex.onrender.com/api/posts/admin?status=${status}`, { headers: authHeaders() });
+                const response = await fetch(`${API_BASE_URL}/api/posts/admin?status=${status}`, { headers: authHeaders() });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.message || 'Could not load posts');
                 renderPosts(data);
@@ -1465,7 +1466,7 @@
         async function reviewPost(postId, status) {
             const note = document.getElementById(`post-note-${postId}`)?.value || '';
             try {
-                const response = await fetch(`https://nexorex.onrender.com/api/posts/${postId}/review`, {
+                const response = await fetch(`${API_BASE_URL}/api/posts/${postId}/review`, {
                     method: 'PATCH',
                     headers: authHeaders(),
                     body: JSON.stringify({ status, admin_note: note })

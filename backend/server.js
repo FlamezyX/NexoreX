@@ -5,27 +5,21 @@ const http = require('http');
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const db = require('./db');
+const { getAllowedOrigins } = require('./middleware/requestGuards');
 require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
+const allowedOrigins = Array.from(getAllowedOrigins());
 const io = new Server(server, {
     cors: {
-        origin: [
-            'https://nexorex.vercel.app',
-            'http://localhost:5500',
-            'http://127.0.0.1:5500'
-        ],
+        origin: allowedOrigins,
         credentials: true
     }
 });
 
 app.use(cors({
-    origin: [
-        'https://nexorex.vercel.app',
-        'http://localhost:5500',
-        'http://127.0.0.1:5500'
-    ],
+    origin: allowedOrigins,
     credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));

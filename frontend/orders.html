@@ -203,7 +203,7 @@
                             <input id="payment-ref-${order.order_id}" type="text" placeholder="Bank transfer reference" value="${order.payment_reference || ''}">
                             <input id="payment-proof-${order.order_id}" type="file" accept="image/png,image/jpeg,image/webp">
                             <div style="color:var(--muted); margin-top:8px;">Accepted formats: JPG, PNG, WEBP</div>
-                            ${order.payment_proof_url ? `<a style="display:inline-block; margin-top:10px; color:var(--brand);" href="https://nexorex.onrender.com${order.payment_proof_url}" target="_blank" rel="noopener noreferrer">View uploaded proof</a>` : ''}
+                            ${order.payment_proof_url ? `<a style="display:inline-block; margin-top:10px; color:var(--brand);" href="${API_BASE_URL}${order.payment_proof_url}" target="_blank" rel="noopener noreferrer">View uploaded proof</a>` : ''}
                             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
                                 <button class="button" type="button" onclick="submitPayment(${order.order_id})">Submit Payment Proof</button>
                                 <button class="button" type="button" style="background:linear-gradient(135deg,#b42318,#7f1d1d);" onclick="cancelOrder(${order.order_id})">Cancel Order</button>
@@ -225,7 +225,7 @@
 
         async function loadOrders() {
             try {
-                const response = await fetch('https://nexorex.onrender.com/api/orders/my', {
+                const response = await fetch(apiUrl('/api/orders/my'), {
                     headers: authHeaders()
                 });
                 const data = await response.json();
@@ -250,7 +250,7 @@
                     paymentProofName = proofFile.name;
                 }
 
-                const response = await fetch(`https://nexorex.onrender.com/api/orders/${orderId}/payment`, {
+                const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/payment`, {
                     method: 'PATCH',
                     headers: authHeaders(),
                     body: JSON.stringify({
@@ -272,7 +272,7 @@
 
         async function submitReview(orderId, productId) {
             try {
-                const response = await fetch('https://nexorex.onrender.com/api/reviews', {
+                const response = await fetch(apiUrl('/api/reviews'), {
                     method: 'POST',
                     headers: authHeaders(),
                     body: JSON.stringify({
@@ -296,7 +296,7 @@
         async function cancelOrder(orderId) {
             if (!confirm('Are you sure you want to cancel this order? This cannot be undone.')) return;
             try {
-                const response = await fetch(`https://nexorex.onrender.com/api/orders/${orderId}/cancel`, {
+                const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/cancel`, {
                     method: 'PATCH',
                     headers: authHeaders()
                 });
@@ -320,7 +320,7 @@
 
         async function loadBankDetails() {
             try {
-                const res = await fetch('https://nexorex.onrender.com/api/platform-settings');
+                const res = await fetch(apiUrl('/api/platform-settings'));
                 const data = await res.json();
                 if (!data.bank_account_number) return;
                 const info = document.getElementById('bankInfo');

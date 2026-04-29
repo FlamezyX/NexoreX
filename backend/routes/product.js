@@ -2,6 +2,7 @@
 
 const express = require('express');
 const { verifyToken, requireRole } = require('../middleware/auth');
+const { requireJson, verifyCsrf } = require('../middleware/requestGuards');
 const {
     addProduct,
     getProducts,
@@ -12,15 +13,8 @@ const {
 
 const router = express.Router();
 
-function requireJson(req, res, next) {
-    if (!req.is('application/json')) {
-        return res.status(415).json({ message: 'Content-Type must be application/json' });
-    }
-    next();
-}
-
-router.post('/upload-image', requireJson, verifyToken, requireRole('seller'), uploadProductImage);
-router.post('/add', requireJson, verifyToken, requireRole('seller'), addProduct);
+router.post('/upload-image', requireJson, verifyCsrf, verifyToken, requireRole('seller'), uploadProductImage);
+router.post('/add', requireJson, verifyCsrf, verifyToken, requireRole('seller'), addProduct);
 router.get('/', getProducts);
 router.get('/seller-profile/:sellerId', getSellerProfile);
 router.get('/seller/:sellerId', verifyToken, requireRole('seller', 'admin'), getSellerProducts);

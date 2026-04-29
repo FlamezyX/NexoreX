@@ -688,7 +688,7 @@
             reviewList.innerHTML = '';
 
             try {
-                const response = await fetch(`https://nexorex.onrender.com/api/reviews/product/${productId}`);
+                const response = await fetch(`${API_BASE_URL}/api/reviews/product/${productId}`);
                 const reviews = await response.json();
 
                 if (!response.ok || !Array.isArray(reviews)) {
@@ -748,7 +748,7 @@
             try {
                 const params = new URLSearchParams({ page: currentPage, limit: 12 });
                 if (currentSearch) params.set('search', currentSearch);
-                const response = await fetch(`https://nexorex.onrender.com/api/products?${params}`);
+                const response = await fetch(`${API_BASE_URL}/api/products?${params}`);
                 const data = await response.json();
 
                 if (!response.ok) throw new Error('Unable to load products');
