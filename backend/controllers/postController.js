@@ -51,11 +51,11 @@ exports.createPost = async (req, res) => {
         }
 
         const result = await queryAsync(
-            `INSERT INTO posts (seller_id, caption, image_url, product_id) VALUES (?, ?, ?, ?)`,
+            `INSERT INTO posts (seller_id, caption, image_url, product_id, status) VALUES (?, ?, ?, ?, 'approved')`,
             [sellerId, caption.trim(), imageUrl, product_id || null]
         );
 
-        res.status(201).json({ message: 'Post submitted and pending admin approval', post_id: result.insertId });
+        res.status(201).json({ message: 'Post published successfully', post_id: result.insertId });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

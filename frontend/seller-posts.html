@@ -87,7 +87,7 @@
         <section class="grid">
             <article class="panel">
                 <h2 style="margin-bottom:6px;">Create a Post</h2>
-                <p style="color:var(--muted);font-size:0.9rem;margin-bottom:4px;">Share updates, product highlights, or announcements. Posts go live after admin approval.</p>
+                <p style="color:var(--muted);font-size:0.9rem;margin-bottom:4px;">Share updates, product highlights, or announcements. Posts go live immediately.</p>
                 <form id="postForm">
                     <label>Caption
                         <textarea id="caption" maxlength="500" placeholder="What do you want to share?" required></textarea>
@@ -104,14 +104,14 @@
                             <option value="">No product tagged</option>
                         </select>
                     </label>
-                    <button class="button" id="submitBtn" type="submit">Submit Post</button>
+                    <button class="button" id="submitBtn" type="submit">Publish Post</button>
                 </form>
                 <div id="formMessage" class="message" aria-live="polite"></div>
             </article>
 
             <article class="panel">
                 <h2 style="margin-bottom:6px;">Your Posts</h2>
-                <p style="color:var(--muted);font-size:0.9rem;">Posts pending approval are only visible to you and admins.</p>
+                <p style="color:var(--muted);font-size:0.9rem;">Your posts are visible to everyone on the community feed.</p>
                 <div id="postList" class="post-list"></div>
             </article>
         </section>
@@ -208,7 +208,7 @@
             if (!caption) { setMessage('Caption is required.', 'error'); return; }
 
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
+            submitBtn.textContent = 'Publishing...';
             setMessage('', '');
 
             try {
@@ -241,7 +241,7 @@
                 setMessage(err.message, 'error');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Post';
+                submitBtn.textContent = 'Publish Post';
             }
         });
 
