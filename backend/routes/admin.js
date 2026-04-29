@@ -15,6 +15,7 @@ const {
     getWithdrawalRequests,
     reviewWithdrawalRequest,
     getAnalytics,
+    getAllUsers,
     getPromoSettings,
     updatePromoSettings,
     getPromoLogs,
@@ -38,6 +39,7 @@ router.patch('/withdrawals/:id', requireJson, verifyCsrf, verifyToken, requirePe
 
 // Analytics — view_analytics permission
 router.get('/analytics', verifyToken, requirePermission('view_analytics'), getAnalytics);
+router.get('/users', verifyToken, requirePermission('view_analytics'), getAllUsers);
 
 // Promo — super admin only, sub-admins never have access
 router.get('/promo-settings', verifyToken, requireSuperAdmin, getPromoSettings);

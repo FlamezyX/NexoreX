@@ -443,6 +443,24 @@ exports.reviewWithdrawalRequest = (req, res) => {
     });
 };
 
+exports.getAllUsers = (req, res) => {
+    const adminId = req.user.id;
+
+    ensureAdmin(adminId, (authErr) => {
+        if (authErr) return res.status(authErr.status).json(authErr.body);
+
+        db.query(
+            `SELECT user_id, fullname, email, role, account_status, seller_status, created_at
+             FROM users
+             ORDER BY created_at DESC`,
+            (err, results) => {
+                if (err) return res.status(500).json(err);
+                res.json(results);
+            }
+        );
+    });
+};
+
 exports.getAnalytics = (req, res) => {
     const adminId = req.user.id;
 

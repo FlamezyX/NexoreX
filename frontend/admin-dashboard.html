@@ -381,6 +381,12 @@
             </article>
 
             <article class="panel">
+                <h2 style="margin:0;">All Users</h2>
+                <p class="small">Every registered user, their role, account status, and seller status.</p>
+                <div id="allUsersEl" style="margin-top:18px; overflow-x:auto;"></div>
+            </article>
+
+            <article class="panel">
                 <h2 style="margin:0;">Review Moderation</h2>
                 <p class="small">Hide or flag abusive reviews, and restore legitimate feedback when needed.</p>
                 <div id="reviews" class="products"></div>
@@ -555,6 +561,7 @@
             loadedApplications = applications;
             const pendingCount = applications.filter((app) => app.status === 'pending').length;
             const reviewedCount = applications.filter((app) => app.status !== 'pending').length;
+            const visibleApplications = applications.filter((app) => app.status === 'pending');
             const paidVerificationPendingCount = applications.filter((app) =>
                 app.status === 'pending' &&
                 app.application_type === 'paid' &&
@@ -569,17 +576,17 @@
             statsPaidVerificationPending.textContent = String(paidVerificationPendingCount);
             statsPromoPending.textContent = String(promoPendingCount);
 
-            if (!applications.length) {
+            if (!visibleApplications.length) {
                 applicationsEl.innerHTML = `
                     <div class="application-card">
-                        <strong>No seller applications yet.</strong>
-                        <div class="small">Once sellers submit their business details, they will appear here.</div>
+                        <strong>No pending seller applications.</strong>
+                        <div class="small">All applications have been reviewed. New submissions will appear here.</div>
                     </div>
                 `;
                 return;
             }
 
-            applicationsEl.innerHTML = applications.map((app) => `
+            applicationsEl.innerHTML = visibleApplications.map((app) => `
                 <div class="application-card">
                     <div class="application-head">
                         <div>
@@ -1014,6 +1021,49 @@
                     </div>
                 `;
                 analyticsTrendEl.innerHTML = '';
+            }
+        }
+
+        async function loadAllUsers() {
+            const usersEl = document.getElementById('allUsersEl');
+            try {
+                const response = await fetch(apiUrl('/api/admin/users'), { headers: authHeaders() });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Could not load users');
+
+                if (!data.length) {
+                    usersEl.innerHTML = '<div class="product-card"><strong>No users yet.</strong></div>';
+                    return;
+                }
+
+                usersEl.innerHTML = `
+                    <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+                        <thead>
+                            <tr style="border-bottom:2px solid var(--line); text-align:left;">
+                                <th style="padding:10px 12px;">Name</th>
+                                <th style="padding:10px 12px;">Email</th>
+                                <th style="padding:10px 12px;">Role</th>
+                                <th style="padding:10px 12px;">Account Status</th>
+                                <th style="padding:10px 12px;">Seller Status</th>
+                                <th style="padding:10px 12px;">Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.map((u, i) => `
+                                <tr style="border-bottom:1px solid var(--line); background:${i % 2 === 0 ? 'rgba(255,255,255,0.4)' : 'transparent'};">
+                                    <td style="padding:10px 12px; font-weight:600;">${u.fullname}</td>
+                                    <td style="padding:10px 12px; color:var(--muted);">${u.email}</td>
+                                    <td style="padding:10px 12px;"><span class="badge">${u.role}</span></td>
+                                    <td style="padding:10px 12px; color:${u.account_status === 'active' ? 'var(--success)' : 'var(--danger)'};">${u.account_status}</td>
+                                    <td style="padding:10px 12px; color:${u.seller_status === 'approved' ? 'var(--success)' : u.seller_status === 'rejected' ? 'var(--danger)' : 'var(--muted)'};">${u.seller_status || '—'}</td>
+                                    <td style="padding:10px 12px; color:var(--muted);">${formatDate(u.created_at)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                usersEl.innerHTML = `<div class="product-card"><strong>Could not load users.</strong><div class="small">${error.message}</div></div>`;
             }
         }
 
@@ -1515,6 +1565,7 @@
             loadShippingOptions();
             loadWithdrawals();
             loadAnalytics();
+            loadAllUsers();
             loadReviews();
             loadPromoSettings();
             loadPromoLogs();
