@@ -645,13 +645,12 @@
             if (user.sellerStatus === 'pending') {
                 headline.textContent = `Hi ${user.name}, your application is under review.`;
                 introText.textContent = 'Your seller application has been received and is currently being reviewed by our admin team. You will be notified once a decision has been made. No further action is needed from you right now.';
-            }
-
-            if (user.phone) {
-                document.getElementById('phone').value = user.phone;
-            }
-            if (user.location) {
-                document.getElementById('location').value = user.location;
+                promoNotice.style.display = 'none';
+                sellerForm.style.display = 'none';
+                formMessage.style.display = 'none';
+                document.querySelector('.grid').style.display = 'none';
+                setMessage(topMessage, '⏳ Your application is under review. We will notify you once the admin makes a decision.', 'success');
+                return;
             }
         }
 
