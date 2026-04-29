@@ -9,5 +9,6 @@ const router = express.Router();
 
 router.get('/', getSettings);
 router.put('/', requireJson, verifyCsrf, verifyToken, requireSuperAdmin, updateSettings);
+router.patch('/', requireJson, verifyCsrf, verifyToken, requireSuperAdmin, updateSettings);
 
 module.exports = router;

@@ -97,43 +97,8 @@
 
     <script src="./app.js"></script>
     <script>
-        // ── Favicon ──
-        (function () {
-            const c = document.createElement('canvas');
-            c.width = 64; c.height = 64;
-            const ctx = c.getContext('2d');
-            const g = ctx.createLinearGradient(0, 0, 64, 64);
-            g.addColorStop(0, '#0077aa');
-            g.addColorStop(0.5, '#00d4ff');
-            g.addColorStop(1, '#a78bfa');
-            ctx.fillStyle = g;
-            ctx.roundRect(0, 0, 64, 64, 14);
-            ctx.fill();
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 28px monospace';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('NX', 32, 33);
-            const link = document.createElement('link');
-            link.rel = 'icon'; link.href = c.toDataURL();
-            document.head.appendChild(link);
-        })();
+        initTheme();
 
-        // ── Theme toggle ──
-        const themeToggle = document.getElementById('themeToggle');
-        const savedTheme = localStorage.getItem('nexoreTheme') || 'dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        themeToggle.textContent = savedTheme === 'light' ? '🌙' : '☀️';
-
-        themeToggle.addEventListener('click', () => {
-            const current = document.documentElement.getAttribute('data-theme');
-            const next = current === 'light' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', next);
-            localStorage.setItem('nexoreTheme', next);
-            themeToggle.textContent = next === 'light' ? '🌙' : '☀️';
-        });
-
-        // ── Login logic ──
         const form      = document.getElementById('loginForm');
         const message   = document.getElementById('message');
         const submitBtn = document.getElementById('submitBtn');

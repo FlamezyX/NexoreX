@@ -392,19 +392,8 @@
             document.head.appendChild(link);
         })();
 
-        // ── Theme toggle ──
-        const themeToggle = document.getElementById('themeToggle');
-        const savedTheme = localStorage.getItem('nexoreTheme') || 'dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        themeToggle.textContent = savedTheme === 'light' ? '🌙' : '☀️';
-
-        themeToggle.addEventListener('click', () => {
-            const current = document.documentElement.getAttribute('data-theme');
-            const next = current === 'light' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', next);
-            localStorage.setItem('nexoreTheme', next);
-            themeToggle.textContent = next === 'light' ? '🌙' : '☀️';
-        });
+        // ── Theme ──
+        initTheme();
 
         // ── Nav refs ──
         const navActions   = document.getElementById('navActions');
@@ -445,18 +434,12 @@
 
             // Preserve toggle button when rebuilding nav actions
             navActions.innerHTML = `
-                <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">${document.documentElement.getAttribute('data-theme') === 'light' ? '🌙' : '☀️'}</button>
+                <button class="theme-toggle" type="button" aria-label="Toggle theme"></button>
                 <a class="link" href="${dashboardPath}">My Dashboard</a>
                 <button class="button" id="logoutBtn" type="button">Logout</button>
             `;
             document.getElementById('logoutBtn').addEventListener('click', () => logoutUser());
-            document.getElementById('themeToggle').addEventListener('click', () => {
-                const current = document.documentElement.getAttribute('data-theme');
-                const next = current === 'light' ? 'dark' : 'light';
-                document.documentElement.setAttribute('data-theme', next);
-                localStorage.setItem('nexoreTheme', next);
-                document.getElementById('themeToggle').textContent = next === 'light' ? '🌙' : '☀️';
-            });
+            initTheme();
         }
 
         function renderEmptyState() {

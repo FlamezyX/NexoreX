@@ -343,6 +343,7 @@
                 <span></span><span></span><span></span>
             </button>
             <div class="nav-actions" id="navActions">
+                <button class="theme-toggle" type="button" aria-label="Toggle theme"></button>
                 <a class="link" href="./index.html">Home Feed</a>
                 <a class="link" href="./cart.html">Cart</a>
                 <a class="link" href="./orders.html">Orders</a>
@@ -623,6 +624,8 @@
             loadOrders();
             loadNotifications();
         }
+
+        initTheme();
 
         // ── Favicon ──
         (function () {

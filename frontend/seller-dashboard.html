@@ -356,6 +356,7 @@
                 <span></span><span></span><span></span>
             </button>
             <div class="nav-actions" id="navActions">
+                <button class="theme-toggle" type="button" aria-label="Toggle theme"></button>
                 <a class="link" href="./index.html">Home Feed</a>
                 <a class="link" href="./seller-products.html">Manage Products</a>
                 <a class="link" href="./seller-orders.html">Seller Orders</a>
@@ -618,26 +619,34 @@
 
             if (user.sellerStatus === 'approved') {
                 headline.textContent = `Welcome back, ${user.name}.`;
-                introText.textContent = 'Your seller account is approved. You can now manage products and move paid orders through fulfillment.';
-                setMessage(topMessage, 'Seller account approved. Product and order tools are ready for you.', 'success');
+                introText.textContent = 'Your store is live. Here is a snapshot of your business.';
+                statusPill.textContent = 'Seller: Approved ✓';
+                statusPill.style.background = 'rgba(15,118,110,0.12)';
+                promoNotice.style.display = 'none';
                 sellerForm.style.display = 'none';
-                if (!document.getElementById('approvedLink')) {
-                    const approvedLink = document.createElement('a');
-                    approvedLink.href = './seller-products.html';
-                    approvedLink.className = 'button';
-                    approvedLink.id = 'approvedLink';
-                    approvedLink.textContent = 'Open Product Manager';
-                    topMessage.insertAdjacentElement('afterend', approvedLink);
-                }
-                if (!document.getElementById('walletLink')) {
-                    const walletLink = document.createElement('a');
-                    walletLink.href = './seller-wallet.html';
-                    walletLink.className = 'button';
-                    walletLink.id = 'walletLink';
-                    walletLink.style.marginLeft = '12px';
-                    walletLink.textContent = 'Open Wallet';
-                    document.getElementById('approvedLink')?.insertAdjacentElement('afterend', walletLink);
-                }
+                formMessage.style.display = 'none';
+                document.querySelector('.grid').innerHTML = `
+                    <article class="panel">
+                        <h2 style="margin:0 0 18px;">Store Overview</h2>
+                        <div class="stats">
+                            <div class="stat"><strong id="approvedStatProducts">—</strong><span>Products listed</span></div>
+                            <div class="stat"><strong id="approvedStatOrders">—</strong><span>Orders received</span></div>
+                            <div class="stat"><strong id="approvedStatBalance">—</strong><span>Wallet balance</span></div>
+                        </div>
+                    </article>
+                    <article class="panel">
+                        <h2 style="margin:0 0 18px;">Quick Actions</h2>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                            <a class="button" href="./seller-products.html" style="text-align:center; text-decoration:none;">🛍️ Manage Products</a>
+                            <a class="button" href="./seller-orders.html" style="text-align:center; text-decoration:none;">📦 View Orders</a>
+                            <a class="button" href="./seller-wallet.html" style="text-align:center; text-decoration:none;">💰 Open Wallet</a>
+                            <a class="button" href="./seller-posts.html" style="text-align:center; text-decoration:none;">📣 My Posts</a>
+                            <a class="button" href="./seller-store.html?seller=${user.id}" style="text-align:center; text-decoration:none;">🏪 My Store</a>
+                            <a class="button" href="./chat.html" style="text-align:center; text-decoration:none;">💬 Messages</a>
+                        </div>
+                    </article>
+                `;
+                loadApprovedStats(user);
                 showWelcomePopup(user);
                 return;
             }
@@ -781,10 +790,33 @@
         loadPromoSettings();
         loadSellerTerms();
         ensureSellerAuthenticated();
+        initTheme();
         document.getElementById('hamburger').addEventListener('click', function() {
             this.classList.toggle('open');
             document.getElementById('navActions').classList.toggle('open');
         });
+
+        async function loadApprovedStats(user) {
+            try {
+                const [productsRes, ordersRes, walletRes] = await Promise.all([
+                    fetch(apiUrl(`/api/products/seller/${user.id}`), { headers: authHeaders() }),
+                    fetch(apiUrl('/api/orders/seller'), { headers: authHeaders() }),
+                    fetch(apiUrl('/api/wallet'), { headers: authHeaders() })
+                ]);
+                const products = await productsRes.json();
+                const orders = await ordersRes.json();
+                const wallet = await walletRes.json();
+                const approvedProducts = Array.isArray(products) ? products.filter(p => p.approval_status === 'approved').length : 0;
+                document.getElementById('approvedStatProducts').textContent = approvedProducts;
+                document.getElementById('approvedStatOrders').textContent = Array.isArray(orders) ? orders.length : 0;
+                document.getElementById('approvedStatBalance').textContent = wallet.available_balance != null ? formatMoney(wallet.available_balance) : '₦0.00';
+            } catch {
+                ['approvedStatProducts','approvedStatOrders','approvedStatBalance'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = '—';
+                });
+            }
+        }
 
         // ── Welcome popup ──
         function spawnConfetti() {

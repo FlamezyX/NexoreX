@@ -260,6 +260,7 @@
                 <span></span><span></span><span></span>
             </button>
             <div class="nav-actions" id="navActions">
+                <button class="theme-toggle" type="button" aria-label="Toggle theme"></button>
                 <a class="link" href="./index.html">Home Feed</a>
                 <a class="link" href="./buyer-dashboard.html">Buyer Dashboard</a>
                 <a class="link" href="./chat.html">💬 Messages</a>
@@ -392,6 +393,18 @@
                 <div id="reviews" class="products"></div>
             </article>
 
+
+            <article class="panel">
+                <h2 style="margin:0;">Platform Bank Details</h2>
+                <p class="small">Set the bank account sellers should pay the store activation fee into. This is shown to sellers during the paid application path.</p>
+                <form id="bankForm" class="shipping-form">
+                    <input id="bankName" type="text" placeholder="Bank name e.g. First Bank" maxlength="100" required>
+                    <input id="bankAccountName" type="text" placeholder="Account name" maxlength="150" required>
+                    <input id="bankAccountNumber" type="text" placeholder="Account number" maxlength="20" required>
+                    <button class="button" id="bankSubmitBtn" type="submit">Save Bank Details</button>
+                </form>
+                <div id="bankMessage" class="message" aria-live="polite"></div>
+            </article>
 
             <article class="panel">
                 <h2 style="margin:0;">Promo Settings</h2>
@@ -1512,6 +1525,48 @@
             loadPromoLogs();
             loadReports();
         }
+
+        initTheme();
+
+        // ── Bank details ──
+        async function loadBankDetails() {
+            try {
+                const res = await fetch(apiUrl('/api/platform-settings'), { headers: authHeaders() });
+                const data = await res.json();
+                if (data.bank_name)          document.getElementById('bankName').value          = data.bank_name;
+                if (data.bank_account_name)  document.getElementById('bankAccountName').value  = data.bank_account_name;
+                if (data.bank_account_number)document.getElementById('bankAccountNumber').value = data.bank_account_number;
+            } catch {}
+        }
+
+        document.getElementById('bankForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('bankSubmitBtn');
+            const msgEl = document.getElementById('bankMessage');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+            try {
+                const res = await fetch(apiUrl('/api/platform-settings'), {
+                    method: 'PATCH',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        bank_name:           document.getElementById('bankName').value.trim(),
+                        bank_account_name:   document.getElementById('bankAccountName').value.trim(),
+                        bank_account_number: document.getElementById('bankAccountNumber').value.trim()
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Could not save bank details');
+                setMessage(msgEl, data.message || 'Bank details saved.', 'success');
+            } catch (err) {
+                setMessage(msgEl, err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Bank Details';
+            }
+        });
+
+        loadBankDetails();
     </script>
 </body>
 </html>

@@ -141,3 +141,26 @@ function orderStatusLabel(status) {
 
     return labels[status] || status;
 }
+
+// ── Global theme toggle ──
+function initTheme() {
+    const saved = localStorage.getItem('nexoreTheme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+
+    function applyIcon(btn, theme) {
+        btn.textContent = theme === 'light' ? '🌙' : '☀️';
+    }
+
+    function toggle() {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('nexoreTheme', next);
+        document.querySelectorAll('.theme-toggle').forEach(btn => applyIcon(btn, next));
+    }
+
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
+        applyIcon(btn, saved);
+        btn.addEventListener('click', toggle);
+    });
+}
