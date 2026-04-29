@@ -4,6 +4,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
 
+/* ── Dark mode (default) ── */
 :root {
     /* Core palette */
     --bg-base:        #080c14;
@@ -41,6 +42,35 @@
     --radius-pill:    999px;
 }
 
+/* ── Light mode ── */
+[data-theme="light"] {
+    --bg-base:        #f0f4f8;
+    --bg-mid:         #e8eef5;
+    --bg-top:         #dde5ef;
+    --panel:          rgba(255, 255, 255, 0.88);
+    --panel-soft:     rgba(255, 255, 255, 0.6);
+    --surface:        rgba(255, 255, 255, 0.75);
+
+    --brand:          #0077aa;
+    --brand-deep:     #005580;
+    --brand-glow:     rgba(0, 119, 170, 0.14);
+    --accent:         #6d28d9;
+    --accent-glow:    rgba(109, 40, 217, 0.12);
+
+    --text:           #1a2332;
+    --muted:          #5a6a7e;
+    --heading:        #0d1520;
+
+    --line:           rgba(0, 119, 170, 0.16);
+    --line-soft:      rgba(0, 0, 0, 0.07);
+    --danger:         #dc2626;
+    --success:        #059669;
+    --warning:        #d97706;
+
+    --shadow:         0 24px 70px rgba(0, 0, 0, 0.1);
+    --shadow-glow:    0 0 40px rgba(0, 119, 170, 0.06);
+}
+
 /* ── Reset & Base ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -56,6 +86,14 @@ body {
     background-attachment: fixed;
     color: var(--text);
     min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="light"] body {
+    background-image:
+        radial-gradient(ellipse at 10% 0%, rgba(0, 119, 170, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 90% 100%, rgba(109, 40, 217, 0.06) 0%, transparent 50%),
+        linear-gradient(180deg, var(--bg-base) 0%, var(--bg-mid) 50%, var(--bg-top) 100%);
 }
 
 /* ── Typography ── */
@@ -310,6 +348,64 @@ body::before {
     background-size: 60px 60px;
     pointer-events: none;
     z-index: 0;
+    transition: opacity 0.3s ease;
+}
+
+[data-theme="light"] body::before {
+    opacity: 0.4;
+}
+
+/* ── Brand logo badge ── */
+.brand-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--brand-deep), var(--brand), #a78bfa);
+    box-shadow: 0 0 18px var(--brand-glow);
+    flex-shrink: 0;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.brand-logo:hover {
+    transform: scale(1.06);
+    box-shadow: 0 0 28px var(--brand-glow);
+}
+.brand-logo span {
+    font-family: 'Space Mono', monospace !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    letter-spacing: 0.04em !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    background: none !important;
+}
+
+.brand-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ── Theme toggle button ── */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-pill) !important;
+    background: var(--surface) !important;
+    border: 1px solid var(--line) !important;
+    cursor: pointer !important;
+    font-size: 1.1rem;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s !important;
+    flex-shrink: 0;
+}
+.theme-toggle:hover {
+    border-color: var(--brand) !important;
+    box-shadow: 0 0 12px var(--brand-glow) !important;
 }
 
 .shell, main, header, footer { position: relative; z-index: 1; }

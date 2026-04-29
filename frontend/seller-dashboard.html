@@ -237,9 +237,12 @@
 <body>
     <main class="shell">
         <nav class="nav">
-            <div>
-                <strong style="display:block; font-size:1.3rem; letter-spacing:0.05em; text-transform:uppercase;">NexoreX</strong>
-                <span id="navGreeting" class="small">Seller space</span>
+            <div class="brand-row">
+                <a href="./index.html" class="brand-logo" aria-label="NexoreX home"><span>NX</span></a>
+                <div>
+                    <strong style="display:block; font-size:1.3rem; letter-spacing:0.05em; text-transform:uppercase;">NexoreX</strong>
+                    <span id="navGreeting" class="small">Seller space</span>
+                </div>
             </div>
             <button class="hamburger" id="hamburger" aria-label="Toggle menu" type="button">
                 <span></span><span></span><span></span>
@@ -656,6 +659,28 @@
             this.classList.toggle('open');
             document.getElementById('navActions').classList.toggle('open');
         });
+
+        // ── Favicon ──
+        (function () {
+            const c = document.createElement('canvas');
+            c.width = 64; c.height = 64;
+            const ctx = c.getContext('2d');
+            const g = ctx.createLinearGradient(0, 0, 64, 64);
+            g.addColorStop(0, '#0077aa');
+            g.addColorStop(0.5, '#00d4ff');
+            g.addColorStop(1, '#a78bfa');
+            ctx.fillStyle = g;
+            ctx.roundRect(0, 0, 64, 64, 14);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 28px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('NX', 32, 33);
+            const link = document.createElement('link');
+            link.rel = 'icon'; link.href = c.toDataURL();
+            document.head.appendChild(link);
+        })();
     </script>
 </body>
 </html>

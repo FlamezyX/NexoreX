@@ -4,30 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | NexoreX</title>
+    <link rel="stylesheet" href="./theme.css">
     <style>
-        :root {
-            --bg: radial-gradient(circle at top, #f7efe1 0%, #dae8f0 45%, #cadfd7 100%);
-            --panel: rgba(255, 255, 255, 0.93);
-            --text: #1f2933;
-            --muted: #5f6c76;
-            --accent: #1d4ed8;
-            --accent-dark: #1e3a8a;
-            --border: rgba(30, 58, 138, 0.14);
-            --danger: #b42318;
-            --success: #166534;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
             min-height: 100vh;
-            font-family: "Trebuchet MS", Verdana, sans-serif;
-            background: var(--bg);
-            color: var(--text);
             display: grid;
             place-items: center;
             padding: 24px;
@@ -35,96 +15,38 @@
             animation: fadeIn 0.45s ease forwards;
         }
 
-        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes fadeIn  { to { opacity: 1; } }
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(24px); }
-            to { opacity: 1; transform: translateY(0); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .card {
             width: min(100%, 430px);
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 26px;
             padding: 32px;
-            box-shadow: 0 24px 80px rgba(30, 58, 138, 0.12);
             animation: slideUp 0.5s ease both;
         }
 
-        h1 {
-            margin: 0 0 8px;
-            font-size: clamp(2rem, 4vw, 2.7rem);
-        }
+        h1 { margin: 0 0 8px; font-size: clamp(2rem, 4vw, 2.7rem); }
 
-        p {
-            margin: 0 0 24px;
-            color: var(--muted);
-        }
+        p { margin: 0 0 24px; }
 
-        form {
-            display: grid;
-            gap: 14px;
-        }
-
-        label {
-            font-size: 0.95rem;
-            font-weight: 700;
-        }
+        form { display: grid; gap: 14px; }
 
         input {
             width: 100%;
             margin-top: 6px;
-            border: 1px solid var(--border);
-            border-radius: 14px;
             padding: 14px 16px;
             font: inherit;
-            background: #fff;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
-        input:focus {
-            outline: 2px solid rgba(29, 78, 216, 0.18);
-            border-color: var(--accent);
-        }
-
-        button {
-            border: 0;
-            border-radius: 999px;
+        .submit-btn {
+            width: 100%;
             padding: 14px 18px;
-            font: inherit;
             font-weight: 700;
-            cursor: pointer;
-            color: #fff;
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
-            box-shadow: 0 10px 24px rgba(29, 78, 216, 0.18);
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 16px 32px rgba(29, 78, 216, 0.26);
-        }
-
-        button:active { transform: translateY(0); }
-
-        button:disabled {
-            opacity: 0.7;
-            cursor: wait;
-        }
-
-        .message {
-            min-height: 24px;
-            margin-top: 14px;
-            font-size: 0.95rem;
-        }
-
-        .message.error {
-            color: var(--danger);
-        }
-
-        .message.success {
-            color: var(--success);
-        }
+        .message { min-height: 24px; margin-top: 14px; font-size: 0.95rem; }
 
         .links {
             margin-top: 18px;
@@ -134,18 +56,21 @@
             flex-wrap: wrap;
         }
 
-        a {
-            color: var(--accent-dark);
-            text-decoration: none;
-            font-weight: 700;
+        .theme-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
         }
     </style>
-        <link rel="stylesheet" href="./theme.css">
 </head>
 <body>
-    <main class="card">
+    <main class="card panel">
+        <div class="theme-row">
+            <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">☀️</button>
+        </div>
+
         <h1>Welcome Back</h1>
-        <p>Sign in to continue. Your password never comes back in the login response.</p>
+        <p class="muted">Sign in to continue. Your password never comes back in the login response.</p>
 
         <form id="loginForm">
             <label>
@@ -158,7 +83,7 @@
                 <input id="password" name="password" type="password" autocomplete="current-password" required>
             </label>
 
-            <button id="submitBtn" type="submit">Login</button>
+            <button class="button submit-btn" id="submitBtn" type="submit">Login</button>
         </form>
 
         <div id="message" class="message" aria-live="polite"></div>
@@ -172,10 +97,47 @@
 
     <script src="./app.js"></script>
     <script>
-        const form = document.getElementById('loginForm');
-        const message = document.getElementById('message');
+        // ── Favicon ──
+        (function () {
+            const c = document.createElement('canvas');
+            c.width = 64; c.height = 64;
+            const ctx = c.getContext('2d');
+            const g = ctx.createLinearGradient(0, 0, 64, 64);
+            g.addColorStop(0, '#0077aa');
+            g.addColorStop(0.5, '#00d4ff');
+            g.addColorStop(1, '#a78bfa');
+            ctx.fillStyle = g;
+            ctx.roundRect(0, 0, 64, 64, 14);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 28px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('NX', 32, 33);
+            const link = document.createElement('link');
+            link.rel = 'icon'; link.href = c.toDataURL();
+            document.head.appendChild(link);
+        })();
+
+        // ── Theme toggle ──
+        const themeToggle = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('nexoreTheme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'light' ? '🌙' : '☀️';
+
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('nexoreTheme', next);
+            themeToggle.textContent = next === 'light' ? '🌙' : '☀️';
+        });
+
+        // ── Login logic ──
+        const form      = document.getElementById('loginForm');
+        const message   = document.getElementById('message');
         const submitBtn = document.getElementById('submitBtn');
-        const params = new URLSearchParams(window.location.search);
+        const params    = new URLSearchParams(window.location.search);
 
         function setMessage(text, type) {
             message.textContent = text;
@@ -192,7 +154,7 @@
             event.preventDefault();
             setMessage('', '');
 
-            const email = document.getElementById('email').value.trim().toLowerCase();
+            const email    = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
 
             if (!email || !password) {
@@ -206,9 +168,7 @@
             try {
                 const response = await fetch(apiUrl('/api/auth/login'), {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
 
